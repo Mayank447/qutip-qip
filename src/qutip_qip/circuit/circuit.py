@@ -966,7 +966,7 @@ class QubitCircuit:
 
         if renderer == "latex":
             from qutip_qip.circuit.draw import TeXRenderer
-            
+
             if file_type == "png" and dpi is None:
                 dpi = 100
 

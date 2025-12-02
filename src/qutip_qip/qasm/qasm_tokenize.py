@@ -1,6 +1,7 @@
 import re
 from itertools import chain
 
+
 def _tokenize_line(command):
     """
     Tokenize (break into several parts a string of) a single line of QASM code.

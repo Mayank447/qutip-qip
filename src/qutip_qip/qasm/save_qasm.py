@@ -17,6 +17,7 @@ _GATE_NAME_TO_QASM_NAME = {
     "TOFFOLI": "ccx",
 }
 
+
 class QasmOutput:
     """
     Class for QASM export.

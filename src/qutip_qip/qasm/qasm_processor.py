@@ -3,7 +3,7 @@ import os
 import warnings
 from copy import deepcopy
 import numpy as np
-from math import pi # Don't remove
+from math import pi  # Don't remove
 
 from qutip_qip.circuit import QubitCircuit
 from qutip_qip.operations import (
@@ -13,6 +13,7 @@ from qutip_qip.operations import (
     snot,
 )
 from qutip_qip.qasm import qasm_tokenize
+
 
 class QasmGate:
     """
@@ -24,6 +25,7 @@ class QasmGate:
         self.gate_args = gate_args
         self.gate_regs = gate_regs
         self.gates_inside = []
+
 
 def _get_qiskit_gates():
     """
@@ -52,7 +54,6 @@ def _get_qiskit_gates():
         return controlled_gate(snot())
 
     return {"ch": ch, "tdg": tdg, "id": id, "u2": u2, "sdg": sdg, "cu3": cu3}
-
 
 
 def _gate_processor(command):
@@ -214,7 +215,7 @@ class QasmProcessor:
                     continue
                 else:
                     raise SyntaxError("QASM: incorrect bracket formatting")
-                
+
             elif open_bracket_mode:
                 # Define the decomposition of custom QASM gate
                 if command[0] == "{":
@@ -269,12 +270,12 @@ class QasmProcessor:
                     self.num_cbits += num_regs
                 else:
                     raise SyntaxError("QASM: incorrect bracket formatting")
-                
+
             elif command[0] == "reset":
                 raise NotImplementedError(
                     ("QASM: reset functionality " "is not supported.")
                 )
-            
+
             elif command[0] in ["barrier", "include"]:
                 continue
 
