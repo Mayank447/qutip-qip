@@ -1,0 +1,52 @@
+lock-version = "1.0"
+created-by = "pip"
+
+[[packages]]
+name = "numpy"
+version = "2.4.2"
+
+[[packages.wheels]]
+name = "numpy-2.4.2-cp312-cp312-macosx_14_0_arm64.whl"
+url = "https://files.pythonhosted.org/packages/2f/20/18026832b1845cdc82248208dd929ca14c9d8f2bac391f67440707fff27c/numpy-2.4.2-cp312-cp312-macosx_14_0_arm64.whl"
+
+[packages.wheels.hashes]
+sha256 = "b3a24467af63c67829bfaa61eecf18d5432d4f11992688537be59ecd6ad32f5e"
+
+[[packages]]
+name = "packaging"
+version = "26.0"
+
+[[packages.wheels]]
+name = "packaging-26.0-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/b7/b9/c538f279a4e237a006a2c98387d081e9eb060d203d8ed34467cc0f0b9b53/packaging-26.0-py3-none-any.whl"
+
+[packages.wheels.hashes]
+sha256 = "b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529"
+
+[[packages]]
+name = "qutip"
+version = "5.2.3"
+
+[[packages.wheels]]
+name = "qutip-5.2.3-cp312-cp312-macosx_11_0_arm64.whl"
+url = "https://files.pythonhosted.org/packages/f8/9f/1e4ded98586129f0857f3a5274e622313b31e53301624efb4a2d9b98f08b/qutip-5.2.3-cp312-cp312-macosx_11_0_arm64.whl"
+
+[packages.wheels.hashes]
+sha256 = "c9b3fc0e6ad593949bb8c4933d26c051f92ddc0528a968534fb0e66e7029f138"
+
+[[packages]]
+name = "qutip-qip"
+
+[packages.directory]
+path = "."
+
+[[packages]]
+name = "scipy"
+version = "1.16.3"
+
+[[packages.wheels]]
+name = "scipy-1.16.3-cp312-cp312-macosx_14_0_arm64.whl"
+url = "https://files.pythonhosted.org/packages/96/5e/36bf3f0ac298187d1ceadde9051177d6a4fe4d507e8f59067dc9dd39e650/scipy-1.16.3-cp312-cp312-macosx_14_0_arm64.whl"
+
+[packages.wheels.hashes]
+sha256 = "2b71d93c8a9936046866acebc915e2af2e292b883ed6e2cbe5c34beb094b82d9"
