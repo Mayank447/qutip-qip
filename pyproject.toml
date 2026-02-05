@@ -77,7 +77,7 @@ qutip_qip = "qutip_qip.family"
 lint = [
     "black==26.1.0",
 ]
-tests = [
+test = [
     "pytest>=5.2",
     "pytest-repeat>=0.9",
 ]
@@ -89,6 +89,7 @@ docs = [
     "numpydoc==1.8.0",
     "docutils==0.20.1",
 ]
+dev = [ {include-group = "test"}, {include-group = "lint"} ]
 
 [tool.setuptools]
 include-package-data = true
