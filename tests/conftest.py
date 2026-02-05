@@ -5,6 +5,15 @@ import tempfile
 import numpy as np
 
 
+def pytest_sessionfinish(session, exitstatus):
+    """
+    Called after whole test run finishes.
+    If exit code is 5 (no tests collected), change it to 0 (success).
+    This removes the need for package pytest-custom-exit-code in CI/CD.
+    """
+    if exitstatus == 5:
+        session.exitstatus = 0
+
 def _add_repeats_if_marked(metafunc):
     """
     If the metafunc is marked with the 'repeat' mark, then add the requisite
