@@ -23,7 +23,7 @@ jobs:
 
       - name: Install documentation dependencies
         run: |
-          python -mpip install -r doc/requirements.txt
+          python -mpip install .[docs]
 
       - name: Install qutip-qip from GitHub
         run: |
@@ -31,7 +31,7 @@ jobs:
           # Install in editable mode so it doesn't matter if we import from
           # inside the installation directory, otherwise we can get some errors
           # because we're importing from the wrong location.
-          python -c 'import qutip_qip; print("QuTiP QIP Version:      %s" % qutip_qip.__version__)'
+          python -c 'import qutip_qip; print(f"QuTiP QIP Version: {qutip_qip.__version__}"'
           python -c 'import qutip; qutip.about()'
 
       - name: Build documentation
