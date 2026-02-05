@@ -1,18 +1,9 @@
-TEXTWIDTH = 7.1398920714
-LINEWIDTH = 3.48692403487
+from concurrent.futures import ProcessPoolExecutor  # for parallel simulations
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-
 from scipy.optimize import curve_fit
-
-try:
-    global_setup(fontsize=10)
-except:
-    pass
-plt.rcParams.update({"text.usetex": False, "font.size": 10})
-from joblib import Parallel, delayed  # for parallel simulations
 import numpy as np
+
 from qutip import (
     fidelity,
     sigmax,
@@ -29,6 +20,11 @@ from qutip_qip.operations import Gate
 from qutip_qip.device import ModelProcessor, Model
 from qutip_qip.compiler import GateCompiler, PulseInstruction
 from qutip_qip.noise import Noise
+
+
+plt.rcParams.update({"text.usetex": False, "font.size": 10})
+TEXTWIDTH = 7.1398920714
+LINEWIDTH = 3.48692403487
 
 
 class MyModel(Model):
@@ -51,7 +47,7 @@ class MyModel(Model):
         elif label[:2] == "sy":
             return 2 * np.pi * sigmay() / 2, [targets]
         else:
-            raise NotImplementError("Unknown control.")
+            raise ValueError("Unknown control.")
 
 
 class MyCompiler(GateCompiler):
@@ -256,10 +252,11 @@ num_gates_list = [250]
 # The full simulation may take several hours
 # so we just choose num_sample=2 and num_gates=250 as a test
 for num_gates in num_gates_list:
-    expect = Parallel(n_jobs=1)(
-        delayed(single_crosstalk_simulation)(num_gates)
-        for i in range(num_sample)
-    )
+    args = [num_gates] * num_sample
+    with ProcessPoolExecutor() as executor:
+        expect = np.array(
+            executor.map(single_crosstalk_simulation, args)
+        )
     fidelity.append(np.mean(expect))
     fidelity_error.append(np.std(expect) / np.sqrt(num_sample))
 

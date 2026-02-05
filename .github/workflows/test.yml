@@ -113,7 +113,6 @@ jobs:
     - name: Test code examples for the pulse paper
       run: |
         cd pulse-paper
-        python -m pip install joblib
         pytest *.py
 
   finalise:
