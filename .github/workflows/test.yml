@@ -98,10 +98,23 @@ jobs:
       run: |
         cd doc
         make doctest
+
+  pulse-paper-code:
+    - uses: actions/checkout@v6
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.12
+
+    - name: Install dependencies
+      run: |
+        python -mpip install --upgrade pip
+        pip install .[full] --group test
+
     - name: Test code examples for the pulse paper
       run: |
+        cd pulse-paper
         python -m pip install joblib
-        cd doc/pulse-paper
         pytest *.py
 
   finalise:
