@@ -23,7 +23,8 @@ jobs:
 
       - name: Install documentation dependencies
         run: |
-          python -mpip install .[docs]
+          python install --upgrade pip
+          python -mpip install --group docs
 
       - name: Install qutip-qip from GitHub
         run: |

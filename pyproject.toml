@@ -68,7 +68,15 @@ qiskit = [
     "qiskit>=2.0.0",
     "qiskit_aer>=0.17.0",
 ]
-lint = ["black>=26.0"]
+full = ["qutip-qip[graphics,qutip-qtrl,qiskit]"]
+
+[project.entry-points."qutip.family"]
+qutip_qip = "qutip_qip.family"
+
+[dependency-groups]
+lint = [
+    "black==26.1.0",
+]
 tests = [
     "pytest>=5.2",
     "pytest-repeat>=0.9",
@@ -81,11 +89,6 @@ docs = [
     "numpydoc==1.8.0",
     "docutils==0.20.1",
 ]
-full = ["qutip-qip[graphics,qutip-qtrl,qiskit]"]
-dev = ["qutip-qip[full,lint,tests,docs]"]
-
-[project.entry-points."qutip.family"]
-qutip_qip = "qutip_qip.family"
 
 [tool.setuptools]
 include-package-data = true
