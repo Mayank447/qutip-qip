@@ -3,6 +3,22 @@ Changelog
 *********
 
 
+Version 0.4.1 (April 7, 2025)
++++++++++++++++++++++++++++++
+
+This update includes improvements such as a new test for verifying that circuit files are correctly saved in PNG, TXT, and PDF formats, and the addition of a package entry point with about information. Bug fixes address a correction in the ZZ coefficients calculation in the superconducting qubits model and ensure that expand_operator outputs the expected data type.
+
+Improvements
+------------
+- Add a test to verify that the Matplotlib, Text, and LaTeX renderers saves circuit files in PNG, TXT, and PDF formats. (#260 by Rushiraj Gadhvi)
+- Add family package entry point with about information. (#261 by Simon Cross)
+
+Bug Fixes
+---------
+- Use wq instead of ``wr`` for ``zz_coeff`` in SCqubits modelling. (#270 by Ferris Prima Nugraha)
+- Ensure the output of ``expand_operator`` is the expected dtype. (#273 by Eric Giguère)
+
+
 Version 0.4.0 (Nov 23, 2024)
 +++++++++++++++++++++++++++++
 
@@ -16,10 +32,10 @@ Improvements
 ------------
 - `einsum` is used to speed up the circuit simulation by up to 10 times. (`#225 <https://github.com/qutip/qutip-qip/pull/225>`_ by Boxi Li)
 
-
 Miscellaneous
 -------------
 - The QIR support is removed. (`#238 <https://github.com/qutip/qutip-qip/pull/238>`_ by Boxi Li)
+
 
 Version 0.3.2 (Sept 3, 2024)
 ++++++++++++++++++++++++++++
@@ -68,6 +84,7 @@ Documentation
 -------------
 - Add synced qutip-qip tutorials to documentation on Read the docs (`#207 <https://github.com/qutip/qutip-qip/pull/207>`_)
 
+
 Version 0.2.3 (December 12, 2022)
 +++++++++++++++++++++++++++++++++
 
@@ -88,7 +105,6 @@ Bug Fixes
 Miscellaneous
 -------------
 - Fix parsing of package versions in packaging 22. (`#181 <https://github.com/qutip/qutip-qip/pull/181>`_)
-
 
 
 Version 0.2.2 (June 20, 2022)
@@ -150,7 +166,6 @@ Improvements
 ------------
 - Efficient Hadamard transform. (`#103 <https://github.com/qutip/qutip-qip/pull/103>`_)
 - Make circuit latex code accessible in `QubitCircuit`. (`#108 <https://github.com/qutip/qutip-qip/pull/108>`_)
-
 
 Bug Fixes
 ----------
