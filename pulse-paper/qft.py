@@ -1,20 +1,14 @@
-TEXTWIDTH = 5.93
-LINEWIDTH = 3.22
+import time
 import matplotlib.pyplot as plt
-
-try:
-    from quantum_plots import global_setup
-
-    global_setup(fontsize=10)
-except:
-    pass
-plt.rcParams.update({"text.usetex": False, "font.size": 10})
-
-
 import numpy as np
+
 from qutip import basis, fidelity
 from qutip_qip.device import LinearSpinChain
 from qutip_qip.algorithms import qft_gate_sequence
+
+plt.rcParams.update({"text.usetex": False, "font.size": 10})
+TEXTWIDTH = 5.93
+LINEWIDTH = 3.22
 
 num_qubits = 10
 # The QFT circuit
@@ -57,8 +51,6 @@ axes[-1].set_xlabel("$t$")
 fig.tight_layout()
 fig.savefig("qft_pulse.pdf")
 
-
-import time
 
 compiling_time = []
 simulation_time = []

@@ -1,22 +1,14 @@
-TEXTWIDTH = 7.1398920714
-LINEWIDTH = 3.48692403487
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-
-try:
-    from quantum_plots import global_setup
-
-    global_setup(fontsize=10)
-except:
-    pass
-plt.rcParams.update({"text.usetex": False, "font.size": 10})
 import numpy as np
 import scipy
-from qutip import sigmaz, basis, sigmax, fidelity
-from qutip_qip.operations import hadamard_transform
-from qutip_qip.pulse import Pulse
+from qutip import sigmaz, basis, sigmax, sigmam
 from qutip_qip.device import LinearSpinChain
 from qutip_qip.circuit import QubitCircuit
+from qutip_qip.noise import DecoherenceNoise
+
+plt.rcParams.update({"text.usetex": False, "font.size": 10})
+TEXTWIDTH = 7.1398920714
+LINEWIDTH = 3.48692403487
 
 pi = np.pi
 num_samples = 500
@@ -98,9 +90,6 @@ fig2.savefig("fig5_decoherence_pulse.pdf")
 fig2.show()
 
 # Test for time-dependent decoherence
-from qutip_qip.noise import DecoherenceNoise
-from qutip import sigmam
-
 tlist = np.linspace(0, 30.0, 100)
 coeff = tlist * 0.01
 proc.add_noise(DecoherenceNoise(sigmam(), targets=0, coeff=coeff, tlist=tlist))

@@ -1,6 +1,8 @@
 import numpy as np
+
 from qutip import basis
 from qutip_qip.circuit import QubitCircuit
+from qutip_qip.compiler import Scheduler, PulseInstruction
 from qutip_qip.device import LinearSpinChain, SpinChainModel, Processor
 from qutip_qip.noise import RelaxationNoise
 
@@ -21,7 +23,6 @@ init_state = basis([2, 2, 2], [0, 0, 0])
 final_state = qc.run(init_state)
 
 processor = LinearSpinChain(num_qubits=3, sx=0.25)
-
 processor.load_circuit(qc)
 
 tlist = np.linspace(0, 20, 300)
@@ -34,12 +35,9 @@ model = SpinChainModel(num_qubits=3, setup="circular", g=1)
 processor = Processor(model=model)
 
 model.get_control(label="sx0")
-
 model.get_control_labels()
 
 # Section 4.3 Scheduler
-from qutip_qip.compiler import Scheduler, PulseInstruction
-
 Scheduler("ASAP").schedule(qc)
 
 inst_list = []

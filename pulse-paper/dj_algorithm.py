@@ -1,19 +1,6 @@
-TEXTWIDTH = 5.93
-LINEWIDTH = 3.22
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-
-try:
-    from quantum_plots import global_setup
-
-    global_setup(fontsize=10)
-except:
-    pass
-plt.rcParams.update({"text.usetex": False, "font.size": 10})
-
-
 import numpy as np
-import matplotlib.pyplot as plt
+
 from qutip_qip.device import (
     OptPulseProcessor,
     LinearSpinChain,
@@ -21,7 +8,11 @@ from qutip_qip.device import (
     SpinChainModel,
 )
 from qutip_qip.circuit import QubitCircuit
-from qutip import basis
+from qutip import basis, hinton
+
+plt.rcParams.update({"text.usetex": False, "font.size": 10})
+TEXTWIDTH = 5.93
+LINEWIDTH = 3.22
 
 num_qubits = 3
 np.random.seed(2)
@@ -185,7 +176,6 @@ fig3.show()
 
 plt.rcParams.update({"text.usetex": False, "font.size": 9})
 # Plot hinton
-from qutip import hinton
 
 fig4, ax4 = plt.subplots(figsize=(LINEWIDTH * 0.9, LINEWIDTH * 0.7), dpi=200)
 first_two_qubits = result1.states[-1].ptrace([0, 1])
