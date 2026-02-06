@@ -7,6 +7,10 @@ __pycache__/
 *.html
 *.htm
 
+# Generated when running code for pulse-paper
+pulse-paper/*.pdf
+pulse-paper/*.png
+
 # C extensions
 *.so
 

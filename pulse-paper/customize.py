@@ -16,7 +16,7 @@ from qutip import (
     fock_dm,
 )
 from qutip_qip.circuit import QubitCircuit
-from qutip_qip.operations import Gate
+from qutip_qip.operations import ParametrizedGate
 from qutip_qip.device import ModelProcessor, Model
 from qutip_qip.compiler import GateCompiler, PulseInstruction
 from qutip_qip.noise import Noise
@@ -69,11 +69,11 @@ class MyCompiler(GateCompiler):
             "RY": self.single_qubit_gate_compiler,
         }
 
-    def generate_pulse(self, gate, tlist, coeff, phase=0.0):
+    def generate_pulse(self, circ_op, tlist, coeff, phase=0.0):
         """Generates the pulses.
 
         Args:
-            gate (qutip_qip.circuit.Gate): A qutip Gate object.
+            circ_op (qutip_qip.circuit.GateInstruction): A GateInstruction object.
             tlist (array): A list of times for the evolution.
             coeff (array): An array of coefficients for the gate pulses
             phase (float): The value of the phase for the gate.
@@ -85,45 +85,50 @@ class MyCompiler(GateCompiler):
 
         pulse_info = [
             # (control label, coeff)
-            ("sx" + str(gate.targets[0]), np.cos(phase) * coeff),
-            ("sy" + str(gate.targets[0]), np.sin(phase) * coeff),
+            ("sx" + str(circ_op.targets[0]), np.cos(phase) * coeff),
+            ("sy" + str(circ_op.targets[0]), np.sin(phase) * coeff),
         ]
-        return [PulseInstruction(gate, tlist=tlist, pulse_info=pulse_info)]
+        return [PulseInstruction(circ_op, tlist=tlist, pulse_info=pulse_info)]
 
-    def single_qubit_gate_compiler(self, gate, args):
+    def single_qubit_gate_compiler(self, circ_op, args):
         """Compiles single qubit gates to pulses.
 
         Args:
-            gate (qutip_qip.circuit.Gate): A qutip Gate object.
+            circ_op (qutip_qip.circuit.GateInstruction)
 
         Returns:
             PulseInstruction (qutip_qip.compiler.instruction.PulseInstruction):
             A pulse instruction to implement a gate containing the control pulses.
         """
         # gate.arg_value is the rotation angle
-        tlist = np.abs(gate.arg_value) / self.params["pulse_amplitude"]
-        coeff = self.params["pulse_amplitude"] * np.sign(gate.arg_value)
+        gate = circ_op.operation
+        arg_value = gate.arg_value
+        print(circ_op)
+
+        tlist = np.abs(arg_value) / self.params["pulse_amplitude"]
+        coeff = self.params["pulse_amplitude"] * np.sign(arg_value)
         coeff /= 2 * np.pi
         if gate.name == "RX":
-            return self.generate_pulse(gate, tlist, coeff, phase=0.0)
+            return self.generate_pulse(circ_op, tlist, coeff, phase=0.0)
         elif gate.name == "RY":
-            return self.generate_pulse(gate, tlist, coeff, phase=np.pi / 2)
+            return self.generate_pulse(circ_op, tlist, coeff, phase=np.pi / 2)
 
-    def rotation_with_phase_compiler(self, gate, args):
+    def rotation_with_phase_compiler(self, circ_op, args):
         """Compiles gates with a phase term.
 
         Args:
-            gate (qutip_qip.circuit.Gate): A qutip Gate object.
+            circ_op (qutip_qip.circuit.GateInstruction):
 
         Returns:
             PulseInstruction (qutip_qip.compiler.instruction.PulseInstruction):
             A pulse instruction to implement a gate containing the control pulses.
         """
         # gate.arg_value is the pulse phase
+        phase = circ_op.operation.arg_value
         tlist = self.params["duration"]
         coeff = self.params["pulse_amplitude"]
         coeff /= 2 * np.pi
-        return self.generate_pulse(gate, tlist, coeff, phase=gate.arg_value)
+        return self.generate_pulse(circ_op, tlist, coeff, phase=phase)
 
 
 # Define a circuit and run the simulation
@@ -215,16 +220,25 @@ def single_crosstalk_simulation(num_gates):
     )
     myprocessor.add_noise(ClassicalCrossTalk(1.0))
 
+    class ROT(ParametrizedGate):
+        def __init__(self, arg_value):
+            super().__init__(arg_value=arg_value)
+
+        @property
+        def num_qubits(self) -> int:
+            return 1
+
     # Define a randome circuit.
     gates_set = [
-        Gate(name="ROT", arg_value=0),
-        Gate(name="ROT", arg_value=np.pi / 2),
-        Gate(name="ROT", arg_value=np.pi),
-        Gate(name="ROT", arg_value=np.pi / 2 * 3),
+        ROT(arg_value=0),
+        ROT(np.pi / 2),
+        ROT(np.pi),
+        ROT(np.pi / 2 * 3),
     ]
     circuit = QubitCircuit(num_qubits)
     for ind in np.random.randint(0, 4, num_gates):
         circuit.add_gate(gates_set[ind], targets=0)
+
     # Simulate the circuit.
     myprocessor.load_circuit(circuit, compiler=mycompiler)
     init_state = tensor(

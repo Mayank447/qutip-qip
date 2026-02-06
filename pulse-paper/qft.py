@@ -107,14 +107,14 @@ ax.plot(
     compiling_time,
     "-s",
     markersize=4,
-    label=r"Compiler (\texttt{Processor.load\_circuit)}",
+    label=r"Compiler $\mathtt{Processor.load\_circuit}$",
 )
 ax.plot(
     range(1, 11),
     simulation_time,
     "-D",
     markersize=4,
-    label=r"Solver (\texttt{Processor.run\_state})",
+    label=r"Solver $\mathtt{Processor.run\_state}$",
 )
 ax.set_ylabel("Simulation time [s]")
 ax.set_xlabel("Number of qubits")
