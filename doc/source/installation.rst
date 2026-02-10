@@ -2,16 +2,6 @@
 Installation
 ************
 
-.. _quickstart:
-
-Quick start
-===========
-To install the package ``qutip-qip`` from PyPI, use
-
-.. code-block:: bash
-
-    pip install qutip-qip
-
 .. _prerequisites:
 
 Prerequisites
@@ -19,14 +9,13 @@ Prerequisites
 This package is built upon QuTiP, of which the installation guide can be found at on `QuTiP Installation <http://qutip.org/docs/latest/installation.html>`_.
 The only difference is that C++ compilers are not required here
 since there is no run-time compiling for qutip-qip.
-The minimal Python version supported is Python 3.10.
 
 
 In particular, following packages are necessary for running qutip-qip
 
 .. code-block:: bash
 
-    numpy scipy cython qutip
+    numpy scipy qutip
 
 The following to packages are used for plotting and testing:
 
