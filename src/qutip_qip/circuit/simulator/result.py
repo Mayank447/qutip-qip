@@ -102,7 +102,7 @@ class CircuitResult:
         fig: "matplotlib.figure.Figure | None" = None,
         ax: "matplotlib.axes.Axes | None" = None,
         color: str = "#1f77b4",
-    ) -> "tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]":
+    ) -> tuple["matplotlib.figure.Figure", "matplotlib.axes.Axes"]:
         """
         Plot a histogram of the measurement outcomes and their probabilities.
 

@@ -10,7 +10,6 @@ from qutip import (
     sigmay,
     destroy,
     identity,
-    QobjEvo,
     fidelity,
     basis,
     sigmam,
@@ -146,7 +145,6 @@ class TestNoise:
         """
         tlist = np.array([1, 2, 3, 4, 5, 6])
         coeff = np.array([1, 1, 1, 1, 1, 1])
-        dummy_qobjevo = QobjEvo(sigmaz(), tlist=tlist)
         mean = 0.0
         std = 0.5
         pulses = [

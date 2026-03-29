@@ -46,20 +46,22 @@ class TestVQA:
         """
         Test numerical inputs for initializing VQA
         """
-        vqa = VQA(num_qubits=1, num_layers=1)
+        VQA(num_qubits=1, num_layers=1)
+
         with pytest.raises(ValueError):
-            vqa = VQA(num_qubits=n[0][0], num_layers=n[0][1])
+            VQA(num_qubits=n[0][0], num_layers=n[0][1])
+
         with pytest.raises(TypeError):
-            vqa = VQA(num_qubits=n[1][0], num_layers=n[1][1])
+            VQA(num_qubits=n[1][0], num_layers=n[1][1])
 
     @pytest.mark.parametrize("method", ["OBSERVABLE", "STATE"])
     def test_cost_methods(self, method):
-        vqa = VQA(num_qubits=1, num_layers=1, cost_method=method)
+        VQA(num_qubits=1, num_layers=1, cost_method=method)
 
     @pytest.mark.parametrize("method", ["Something else", 1, [0]])
     def test_invalid_cost_methods(self, method):
         with pytest.raises(ValueError):
-            vqa = VQA(num_qubits=1, num_layers=1, cost_method=method)
+            VQA(num_qubits=1, num_layers=1, cost_method=method)
 
 
 class TestVQACircuit:
@@ -176,7 +178,7 @@ class TestVQACircuit:
         """
         Check plotting function returns without error
         """
-        plt = pytest.importorskip("matplotlib.pyplot")
+        pytest.importorskip("matplotlib.pyplot")
         # Only test on environments that have the matplotlib dependency
         vqa = VQA(num_qubits=4, num_layers=1, cost_method="STATE")
         for i in range(4):

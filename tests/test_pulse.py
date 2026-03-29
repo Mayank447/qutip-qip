@@ -126,9 +126,8 @@ class TestPulse:
         """
         Test for creating empty Pulse, Pulse with constant coefficients etc.
         """
-        coeff = np.array([0.1, 0.2, 0.3, 0.4])
         tlist = np.array([0.0, 1.0, 2.0, 3.0])
-        ham = sigmaz()
+
         # Special ways of initializing pulse
         pulse2 = Pulse(sigmax(), 0, tlist, True)
         assert_allclose(
@@ -146,6 +145,7 @@ class TestPulse:
         coeff_noise = np.array([0.5, 0.1, 0.5])
         tlist_noise2 = np.array([0.5, 2, 3.0])
         coeff_noise2 = np.array([0.1, 0.2, 0.3])
+
         # Pulse with different dims
         random_qobj = Qobj(np.random.random((3, 3)))
         pulse5 = Pulse(sigmaz(), 1, tlist, True)

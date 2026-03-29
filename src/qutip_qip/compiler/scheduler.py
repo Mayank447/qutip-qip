@@ -469,10 +469,13 @@ class Scheduler:
 
         # Generate the quantum operations dependency graph.
         instructions_graph = InstructionsGraph(circuit_instruction)
+
+        def commutation_rules(*args, **kwargs):
+            return False
+
         if self.allow_permutation:
             commutation_rules = self.commutation_rules
-        else:
-            commutation_rules = lambda *args, **kwargs: False  # TODO check this line
+
         instructions_graph.generate_dependency_graph(commuting=commutation_rules)
         if self.method == "ALAP":
             instructions_graph.reverse_graph()

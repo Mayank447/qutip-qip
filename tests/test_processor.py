@@ -358,7 +358,6 @@ class TestCircuitProcessor:
         # setup and fidelity without noise
         init_state = qubit_states(2, [0, 0, 0, 0])
         tlist = np.linspace(0.0, np.pi / 2.0, 10)
-        a = destroy(2)
         proc = Processor(num_qubits=2, t2=100)
         proc.add_control(sigmax(), targets=1, label="sx")
         proc.set_all_coeffs({"sx": np.array([1.0] * len(tlist))})
