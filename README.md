@@ -1,11 +1,13 @@
 # qutip-qip
 
 [![Tests](https://github.com/qutip/qutip-qip/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/qutip/qutip-qip/actions/workflows/test.yml)
-[![Documentation Status](https://readthedocs.org/projects/qutip-qip/badge/?version=stable)](https://qutip-qip.readthedocs.io/en/stable/)
-[![PyPI version](https://badge.fury.io/py/qutip-qip.svg)](https://badge.fury.io/py/qutip-qip)
-[![arXiv paper](https://img.shields.io/badge/arXiv-2105.09902-<COLOR>.svg)](https://arxiv.org/abs/2105.09902)
-[![Maintainability](https://api.codeclimate.com/v1/badges/30293d7b8eb249f8d679/maintainability)](https://codeclimate.com/github/qutip/qutip-qip/maintainability)
+[![Documentation Status](https://readthedocs.org/projects/qutip-qip/badge/?version=latest)](https://qutip-qip.readthedocs.io/en/latest/)
 [![Coverage Status](https://coveralls.io/repos/github/qutip/qutip-qip/badge.svg)](https://coveralls.io/github/qutip/qutip-qip)
+[![Maintainability](https://qlty.sh/gh/qutip/projects/qutip-qip/maintainability.svg)](https://qlty.sh/gh/qutip/projects/qutip-qip)
+[![PyPI version](https://badge.fury.io/py/qutip-qip.svg)](https://badge.fury.io/py/qutip-qip)
+![Python Version](https://img.shields.io/pypi/pyversions/qutip-qip)
+[![DOI](https://img.shields.io/badge/DOI-10.22331%2Fq--2022--01--24--630-blue.svg)](https://doi.org/10.22331/q-2022-01-24-630)
+[![license](https://img.shields.io/badge/license-New%20BSD-blue.svg)](http://en.wikipedia.org/wiki/BSD_licenses#3-clause_license_.28.22Revised_BSD_License.22.2C_.22New_BSD_License.22.2C_or_.22Modified_BSD_License.22.29)
 
 The qutip-qip package used to be a module ``qutip.qip`` under [QuTiP (Quantum Toolbox in Python)](http://qutip.org/index.html).
 From QuTiP 5.0, the community has decided to decrease the size of the core QuTiP package by reducing the external dependencies, in order to simplify maintenance.
@@ -31,7 +33,7 @@ As the introduction suggested, this package is based on a module in the [QuTiP](
 If you were using the `qutip` package and now want to try out the new features included in this package, you can simply install this package and replace all the `qutip.qip` in your import statement with `qutip_qip`. Everything should work smoothly as usual.
 
 Documentation and tutorials
--------------
+---------------------------
 
 The documentation of `qutip-qip` updated to the latest development version is hosted at [qutip-qip.readthedocs.io/](https://qutip-qip.readthedocs.io/en/stable/).
 Tutorials related to using quantum gates and circuits in `qutip-qip` can be found [*here*](https://qutip.org/tutorials#quantum-information-processing) and those related to using noise simulators areavailable at [*this link*](https://qutip.org/tutorials#nisq). 
@@ -103,6 +105,5 @@ at RIKEN, by the University of Sherbrooke, by Chalmers University of Technology,
 
 License
 -------
-[![license](https://img.shields.io/badge/license-New%20BSD-blue.svg)](http://en.wikipedia.org/wiki/BSD_licenses#3-clause_license_.28.22Revised_BSD_License.22.2C_.22New_BSD_License.22.2C_or_.22Modified_BSD_License.22.29)
 
-You are free to use this software, with or without modification, provided that the conditions listed in the LICENSE.txt file are satisfied.
+You are free to use this software, with or without modification, provided that the conditions listed in the [LICENSE](https://github.com/qutip/qutip-qip/blob/master/LICENSE) file are satisfied.
