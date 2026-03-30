@@ -2,37 +2,23 @@
 
 First off, thanks for taking the time to contribute! ❤️
 
-All types of contributions are encouraged and valued. Please make sure to [read the relevant section](#table-of-contents) before making your contribution.
+All types of contributions are encouraged and valued. Please make sure to [read the relevant sections](#table-of-contents) before making your contribution.
 
 ## Table of Contents
 
-- [Code of Conduct](#code-of-conduct)
-- [I Have a Question](#i-have-a-question)
-- [Reporting Bugs](#reporting-bugsissues)
 - [Contributing to Code](#contributing-to-code)
+    - [Before you start](#before-you-start)
+    - [Choose an issue to work on](#choose-an-issue-to-work-on)
+    - [Assigning Issues](#assigning-issues)
+    - [Development Workflow](#development-workflow)
+    - [Code Review](#code-review)
+    - [AI Tool Usage Policy](#ai-tool-usage-policy)
 - [Improving the Documentation](#improving-the-documentation)
 
-
-## Code of Conduct
-This project and everyone participating in it are governed by the [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
-
-
-## I Have a Question
-You can ask questions or answer other users' questions on our [Discussion](https://github.com/qutip/qutip-qip/discussions) forum on GitHub or in the [QuTiP Google discussion group](https://groups.google.com/forum/#!forum/qutip). You may also suggest new features or improvements you would like to see in the project. We encourage you to engage with the community and share your ideas and knowledge.
-
-
-## Reporting Bugs/Issues
-If you find a bug or issue, it is best to first search in the existing [Issues](https://github.com/qutip/qutip-qip/issues) list. If you didn't find a related issue, please report the bug by opening a new issue:
-
-- Create a new [Issue](https://github.com/qutip/qutip-qip/issues/new) on GitHub.
-- Provide as much context as you can about what you're running into.
-- Provide the python and package versions by running `qutip.about()` command.
-
-We will then take care of the issue as soon as possible.
-
-
 ## Contributing to Code
-If you want to contribute, please read the [Contributing to QuTiP-qip development](https://qutip-qip.readthedocs.io/en/latest/contribution-code.html) section of the documentation to set up the Python environment for development.
+
+### Before you start
+It is best to familiarize yourself with the project. You can start by reading the [documentation](https://qutip-qip.readthedocs.io/en/latest/) and trying out the examples provided in the [tutorials](https://qutip-qip.readthedocs.io/en/latest/tutorials_v5.html).
 
 ### Choose an issue to work on
 QuTiP-qip uses the following labels to help non-maintainers find issues best suited to their interests and experience level:
@@ -45,6 +31,13 @@ In our workflow, we generally avoid formally assigning issues to contributors. T
 
 The only exception to this is a small subset of “core” issues. These are typically more complex, sensitive, or tightly coupled to ongoing development efforts, and are therefore handled directly by maintainers.
 
+### Development Workflow
+Please refer to the [contributing to source code](https://qutip-qip.readthedocs.io/en/latest/contribution-code.html) section of the documentation for details on our development workflow, including how to set up your environment, style code, run tests and submit pull requests.
+
+### Code Review
+Code review is done in the open and is open to anyone. While only maintainers have access to merge commits, community feedback on pull requests is extremely valuable. It is also a good mechanism to learn about the code base.
+
+Response times may vary for your PR due to other commitments the maintainers have. If you have been waiting over a week for a review on your PR feel free to tag the relevant maintainer in a comment to politely remind them to review your work.
 
 ### AI Tool Usage Policy
 We have no objections to the use of AI tools to improve efficiency and enhance quality of work. We ask only that contributors are honest about any such usage and that all outputs can be considered their own work, in that they fully understand, endorse and can explain anything that is submitted.
