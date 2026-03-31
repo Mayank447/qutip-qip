@@ -12,8 +12,11 @@ All types of contributions are encouraged and valued. Please make sure to [read 
     - [Assigning Issues](#assigning-issues)
     - [Development Workflow](#development-workflow)
     - [Code Review](#code-review)
-    - [AI Tool Usage Policy](#ai-tool-usage-policy)
 - [Improving the Documentation](#improving-the-documentation)
+    - [Adding/Updating tutorials](#addingupdating-new-tutorials)
+    - [Fixing typos and errors](#fixing-typos-and-errors)
+    - [Adding new sections or topics, Improving explanations and examples](#adding-new-sections-or-topics,-improving-explanations-and-examples)
+- [AI Tools Usage Policy](#ai-tools-usage-policy)
 
 ## Contributing to Code
 
@@ -37,17 +40,25 @@ Please refer to the [contributing to source code](https://qutip-qip.readthedocs.
 ### Code Review
 Code review is done in the open and is open to anyone. While only maintainers have access to merge commits, community feedback on pull requests is extremely valuable. It is also a good mechanism to learn about the code base.
 
-Response times may vary for your PR due to other commitments the maintainers have. If you have been waiting over a week for a review on your PR feel free to tag the relevant maintainer in a comment to politely remind them to review your work.
-
-### AI Tool Usage Policy
-We have no objections to the use of AI tools to improve efficiency and enhance quality of work. We ask only that contributors are honest about any such usage and that all outputs can be considered their own work, in that they fully understand, endorse and can explain anything that is submitted.
-
-AI use is strongly discouraged where it leads to overly verbose content. In communications, whether via e-mail, GitHub or other channels, we expect to communicate directly with other humans and not with automated systems. Use of translation tools is completely welcome.
+Response times may vary for your PR due to other commitments the maintainers have. If you have been waiting over a week for a review on your PR feel free to tag the relevant maintainer in a comment to gently remind them to review your work.
 
 
 ## Improving The Documentation
-Documentation is a crucial part of any project, and we welcome contributions to improve it. If you find any errors, inconsistencies, or areas that could be clarified, please feel free to submit a pull request with your suggested changes. You can also open an issue to discuss potential improvements before making changes.
+### Adding/Updating tutorials
+You can add new tutorials or update existing ones in the [Tutorials](http://github.com/qutip/qutip-tutorials/) repository. If you have an idea for a tutorial example that you think would be helpful to others, please feel free to submit a pull request with your suggested tutorial.
 
-Please read the [Contributing to the documentation](https://qutip-qip.readthedocs.io/en/latest/contribution-docs.html) for more details on how to contribute to the documentation.
+### Fixing typos and errors
+If you spot a typo, broken link, grammatical mistake, or notice any information in the documentation that is outdated or incorrect, feel free to open a Pull Request directly with your fixes. Every bit helps!
 
-Also you can add new tutorials in the [Tutorials](http://github.com/qutip/qutip-tutorials/) repository. If you have an idea for a tutorial example that you think would be helpful to others, please feel free to submit a pull request with your suggested tutorial.
+You will need to fork and clone the repository to make changes to the documentation. If this is your first time contributing to an open source project, you can refer to the [contributing to code](https://qutip-qip.readthedocs.io/en/latest/contribution-code.html) section for instructions on how to fork, clone and submit a pull request.
+
+### Adding new sections or topics, Improving existing explanations and examples
+Please follow the instructions in the [contributing to documentation](https://qutip-qip.readthedocs.io/en/latest/contribution-docs.html) to build the documentation locally and to run the doctests.
+
+If you come across any section of the documentation that could be explained more clearly, have ideas for improving existing examples, or think a new section or topic would be beneficial, please open an issue first to discuss your suggestions. Once the changes are discussed, you can submit a Pull Request with the proposed changes.
+
+
+## AI Tools Usage Policy
+We have no objections to the use of AI tools to improve efficiency and enhance quality of work. We ask only that contributors are honest about any such usage and that all outputs can be considered their own work, in that they fully understand, endorse and can explain anything that is submitted.
+
+AI use is strongly discouraged where it leads to overly verbose content. In communications, whether via e-mail, GitHub or other channels, we expect to communicate directly with other humans and not with automated systems. Use of translation tools is completely welcome.
