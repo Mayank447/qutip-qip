@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath("."))
 # -- Project information -----------------------------------------------------
 
 project = "qutip_qip"
-copyright = "2021, QuTiP Community"
+copyright = "2021-2026, QuTiP Community"
 author = "QuTiP Community"
 
 
