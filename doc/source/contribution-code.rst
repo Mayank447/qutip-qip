@@ -90,6 +90,12 @@ set up earlier. If you are in the root of the ``qutip-qip`` repository
 
    pip install -e .[full]
 
+If you are using ``zsh`` shell. The command is
+
+.. code-block::
+
+   pip install -e ".[full]""
+
 After you have done this, you should
 be able to ``import qutip_qip`` from anywhere as long as you have this development
 environment active. Also you should install the dev dependencies for testing, linting
@@ -127,10 +133,7 @@ steps:
 #. Make a pull request (PR) to the qutip/qutip-qip repository
 
 You can read more documentation about this pattern in the
-`GitHub guide to Flow`_, and see
-`the GitHub blog post
-<https://github.blog/2015-07-29-git-2-5-including-multiple-worktrees-and-triangular-workflows/#improved-support-for-triangular-workflows>`_
-about when the Git tool added greater support for this type of triangular work.
+`GitHub guide to Flow`_.
 
 While using this pattern, you should keep your ``master`` branch looking the
 same as ours, or at least you should not add any commits to it that we do not
