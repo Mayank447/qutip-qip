@@ -9,7 +9,7 @@
 ![Python Version](https://img.shields.io/pypi/pyversions/qutip-qip)
 [![license](https://img.shields.io/badge/license-New%20BSD-blue.svg)](http://en.wikipedia.org/wiki/BSD_licenses#3-clause_license_.28.22Revised_BSD_License.22.2C_.22New_BSD_License.22.2C_or_.22Modified_BSD_License.22.29)
 
-The qutip-qip is a QuTiP family package for Quantum Information Processing.
+The qutip-qip is the QuTiP family package for Quantum Information Processing.
 Compared to other libraries for quantum information processing, qutip-qip puts additional emphasis on the physics layer and the interaction with the QuTiP package.
 
 The package offers two different approaches for simulating Quantum Circuits, one with calculating unitary evolution under quantum gates by matrix product. Another with `Processor` using open system solvers in QuTiP to simulate Quantum Circuit on noisy quantum devices like Super Conducting Qubits, Spin Chains etc. at a Pulse level.
@@ -53,11 +53,9 @@ The documentation and tutorials for `qutip-qip` can be found at [qutip-qip.readt
 Code examples used in the publication [*Pulse-level noisy quantum circuits with QuTiP*](https://quantum-journal.org/papers/q-2022-01-24-630), updated for the latest code version can be found in the [pulse-paper](https://github.com/qutip/qutip-qip/tree/master/pulse-paper) folder.
 
 
-## Migrating from ``qutip.qip``
+## Migrating from qutip.qip
 
 The `qutip-qip` package was previosuly a module ``qutip.qip`` under [QuTiP (Quantum Toolbox in Python)](http://qutip.org/index.html). From QuTiP 5.0, the community decided to decrease the size of the core QuTiP package, in order to simplify maintenance and for the sub-packages to evolve more quickly. If you were using the `qutip` package and now want to try out the new features included in this package, you can simply install this package and replace all the `qutip.qip` in your import statement with `qutip_qip`. Everything should work smoothly as usual.
-
-The separated modules from the core QuTiP and will become QuTiP family packages. They are still maintained by the QuTiP team but hosted under different repositories in the [QuTiP organization](https://github.com/qutip).
 
 
 ## Installation from source
@@ -94,7 +92,7 @@ We will then take care of the issue as soon as possible.
 If you'd like to contribute to `qutip-qip`, please take a look at the [CONTRIBUTING.md](https://github.com/qutip/qutip-qip/blob/master/CONTRIBUTING.md) file.
 
 
-## Citing `qutip-qip`
+## Citing qutip-qip
 
 If you use `qutip-qip` in your research, please cite this [paper](https://quantum-journal.org/papers/q-2022-01-24-630). The BibTeX file can found [here](https://github.com/qutip/qutip-qip/tree/master/doc/source/qutip_qip.bib).
 
