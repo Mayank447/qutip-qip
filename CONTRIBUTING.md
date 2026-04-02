@@ -13,9 +13,9 @@ All types of contributions are encouraged and valued. Please make sure to [read 
     - [Development Workflow](#development-workflow)
     - [Code Review](#code-review)
 - [Improving the Documentation](#improving-the-documentation)
-    - [Adding/Updating tutorials](#addingupdating-new-tutorials)
     - [Fixing typos and errors](#fixing-typos-and-errors)
     - [Adding new sections or topics, Improving explanations and examples](#adding-new-sections-or-topics,-improving-explanations-and-examples)
+    - [Adding/Updating tutorials](#addingupdating-new-tutorials)
 - [AI Tools Usage Policy](#ai-tools-usage-policy)
 
 ## Contributing to Code
@@ -35,28 +35,31 @@ In our workflow, we generally avoid formally assigning issues to contributors. T
 The only exception to this is a small subset of “core” issues. These are typically more complex, sensitive, or tightly coupled to ongoing development efforts, and are therefore handled directly by maintainers.
 
 ### Development Workflow
-Please refer to the [contributing to source code](https://qutip-qip.readthedocs.io/en/latest/contribution-code.html) section of the documentation for details on our development workflow, including how to set up your environment, style code, run tests and submit pull requests.
+Please refer to the [contributing to code](https://qutip-qip.readthedocs.io/en/latest/contribution-code.html) section of the documentation for details on our development workflow, including how to set up the Python environment, style code, run tests and submit pull requests.
 
 ### Code Review
 Code review is done in the open and is open to anyone. While only maintainers have access to merge commits, community feedback on pull requests is extremely valuable. It is also a good mechanism to learn about the code base.
 
 Response times may vary for your PR due to other commitments the maintainers have. If you have been waiting over a week for a review on your PR feel free to tag the relevant maintainer in a comment to gently remind them to review your work.
 
+<br>
 
-## Improving The Documentation
-### Adding/Updating tutorials
-You can add new tutorials or update existing ones in the [Tutorials](http://github.com/qutip/qutip-tutorials/) repository. If you have an idea for a tutorial example that you think would be helpful to others, please feel free to submit a pull request with your suggested tutorial.
+## Contributing to Documentation
+Thank you for your interest in improving our documentation! Clear, accurate, and well-structured documentation is essential for making this project accessible and useful to everyone. We welcome contributions of all sizes—from small typo fixes to entirely new sections.
+
+### Setting up the environment
+Please follow the instructions in the [contributing to documentation](https://qutip-qip.readthedocs.io/en/latest/contribution-docs.html) to build the documentation and to run the doctests locally.
 
 ### Fixing typos and errors
 If you spot a typo, broken link, grammatical mistake, or notice any information in the documentation that is outdated or incorrect, feel free to open a Pull Request directly with your fixes. Every bit helps!
 
-You will need to fork and clone the repository to make changes to the documentation. If this is your first time contributing to an open source project, you can refer to the [contributing to code](https://qutip-qip.readthedocs.io/en/latest/contribution-code.html) section for instructions on how to fork, clone and submit a pull request.
+### Enhancing and Expanding Documentation
+If you come across any section of the documentation that could be explained more clearly, have ideas for improving existing examples, or think a new section or topic would be beneficial, please open an issue first to discuss your suggestions. After the changes have been discussed and agreed upon, you can proceed to submit a Pull Request with your proposed updates.
 
-### Adding new sections or topics, Improving existing explanations and examples
-Please follow the instructions in the [contributing to documentation](https://qutip-qip.readthedocs.io/en/latest/contribution-docs.html) to build the documentation locally and to run the doctests.
+### Tutorials
+You can add new tutorials or update existing ones in the [Tutorials](http://github.com/qutip/qutip-tutorials/) repository. If you have an idea for a tutorial example that you think would be helpful to others, please feel free to submit a pull request with your suggested tutorial.
 
-If you come across any section of the documentation that could be explained more clearly, have ideas for improving existing examples, or think a new section or topic would be beneficial, please open an issue first to discuss your suggestions. Once the changes are discussed, you can submit a Pull Request with the proposed changes.
-
+<br>
 
 ## AI Tools Usage Policy
 We have no objections to the use of AI tools to improve efficiency and enhance quality of work. We ask only that contributors are honest about any such usage and that all outputs can be considered their own work, in that they fully understand, endorse and can explain anything that is submitted.
