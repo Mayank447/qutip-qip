@@ -35,10 +35,12 @@ In our workflow, we generally avoid formally assigning issues to contributors. T
 The only exception to this is a small subset of “core” issues. These are typically more complex, sensitive, or tightly coupled to ongoing development efforts, and are therefore handled directly by maintainers.
 
 ### Development Workflow
-Please refer to the [contributing to code](https://qutip-qip.readthedocs.io/en/latest/contribution-code.html) section of the documentation for details on our development workflow, including how to set up the Python environment, style code, run tests and submit pull requests.
+Please refer to the [contributing to code](https://qutip-qip.readthedocs.io/en/latest/contribution-code.html) section of the documentation for details on our development workflow, including how to set up the Python environment, style code, run tests and submit pull requests (PR).
+
+You may also open a draft PR with changes in order to discuss and receive feedback on the best approach if you are not sure what the best way forward is.
 
 ### Code Review
-Code review is done in the open and is open to anyone. While only maintainers have access to merge commits, community feedback on pull requests is extremely valuable. It is also a good mechanism to learn about the code base.
+Code review is done in the open and is open to anyone. While only maintainers have access to merge commits, community feedback on pull requests is extremely valuable. It is also a good mechanism to learn about the code base both for the contributor and reviewer.
 
 Response times may vary for your PR due to other commitments the maintainers have. If you have been waiting over a week for a review on your PR feel free to tag the relevant maintainer in a comment to gently remind them to review your work.
 
@@ -62,6 +64,37 @@ You can add new tutorials or update existing ones in the [Tutorials](http://gith
 <br>
 
 ## AI Tools Usage Policy
-We have no objections to the use of AI tools to improve efficiency and enhance quality of work. We ask only that contributors are honest about any such usage and that all outputs can be considered their own work, in that they fully understand, endorse and can explain anything that is submitted.
+We acknowledge the use of AI tools to improve efficiency and enhance quality of work. We only ask that the contributors follow the below guidelines:
 
-AI use is strongly discouraged where it leads to overly verbose content. In communications, whether via e-mail, GitHub or other channels, we expect to communicate directly with other humans and not with automated systems. Use of translation tools is completely welcome.
+### 1. Accountability
+
+The human contributor is the solely responsible for their contribution i.e. all the AI-generated outputs can be considered their own work. If you're submitting a Pull Request that includes AI-generated code, documentation:
+
+- You are responsible for ensuring that code you submit meets the qutip-qip project’s standards.
+- You must fully understand every line of code in the submission.
+- You must be able to explain the "why" behind the implementation during the review process.
+
+### 2. Transparency
+
+All Pull Requests must fill the "AI Tools Usage" section in the pull request template. This disclosure is mandatory and must reflect the actual use of AI tools.
+
+### 3. Copyright & Legal
+
+By submitting a contribution to qutip-qip, you agree to
+
+1. Submit your contribution under the project's license and hold the copyright to your changes.
+
+2. The contribution does not violate the terms of service of the AI Model/Tool provider and does not include "regurgitated" code from libraries with incompatible licenses (e.g., GPL-licensed code) being suggested into our BSD-3 licensed project.
+
+3. AI agents must not sign commits or be added to commit message trailer `Co-authored-by:` since copyright is fundamentally tied to the concept of human authorship as per the Copyright law. You can instead use `Assisted-by: AI Model/Tool` as commit message trailer e.g. `Assisted-by: Claude Code with Opus 4.6`.
+
+### 4. Prohibited Use
+
+The following are strictly prohibited and will result in an immediate closure of the PR:
+
+- **Ban on Bots/Agents:** Fully autonomous or unsupervised AI agents (e.g. OpenClaw etc.) are not allowed to submit pull requests.
+- **Communication:** In communication whether via GitHub Issues/Discussion, writing PR desciptions or replying to comments, we expect to communicate directly with other humans not with automated systems. Use of translation tools is completely welcome.
+
+### 5. Enforcement
+
+Maintainers reserve the right to close any PR that appears to be a "low-effort" AI contribution.
