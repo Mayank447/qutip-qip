@@ -78,6 +78,7 @@ qutip_qip = "qutip_qip.family"
 [dependency-groups]
 lint = [
     "black==26.1.0",
+    "pre-commit>=3.5.0",
 ]
 test = [
     "pytest>=8.0",
@@ -86,10 +87,11 @@ test = [
 ]
 doc = [
     "docutils==0.21.1",
+    "numpydoc==1.10.0",
     "sphinx==8.1.3",
     "sphinx-rtd-theme==3.1.0",
     "sphinxcontrib-bibtex==2.6.5",
-    "numpydoc==1.10.0",
+    "sphinx-copybutton==0.5.2",
 ]
 dev = [ {include-group = "test"}, {include-group = "lint"}]
 
