@@ -178,7 +178,10 @@ on all the files you changed, and do
 
    git commit -m "<your message>"
 
-to commit them.  Once you've made all the commits you want to make, push them to
+to commit them.  Although optional it is recommended to [sign your commits](https://endjin.com/blog/how-to-sign-your-git-commits)
+as a proof of authorship.
+
+Once you've made all the commits you want to make, push them to
 your GitHub fork with
 
 .. code-block::
@@ -186,7 +189,6 @@ your GitHub fork with
    git push -u origin
 
 and make the Pull Request (PR) using the GitHub web interface in the qutip-qip repository.
-
 
 .. _GitHub guide to Flow: https://guides.github.com/introduction/flow
 
