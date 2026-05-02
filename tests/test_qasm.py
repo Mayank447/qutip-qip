@@ -103,7 +103,7 @@ def test_qasm_teleportation():
 
     state = tensor(rand_ket(2), basis(2, 0), basis(2, 0))
     _, initial_probabilities = initial_measurement.measurement_comp_basis(
-        state, targets=[0]
+        state, qubits=[0]
     )
 
     teleportation_results = teleportation.run_statistics(state)
@@ -115,7 +115,7 @@ def test_qasm_teleportation():
         final = state
         prob = probabilities[i]
         _, final_probabilities = final_measurement.measurement_comp_basis(
-            final, targets=[2]
+            final, qubits=[2]
         )
         np.testing.assert_allclose(initial_probabilities, final_probabilities)
         assert prob == pytest.approx(0.25, abs=1e-7)

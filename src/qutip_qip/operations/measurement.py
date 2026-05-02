@@ -5,7 +5,7 @@ from qutip import basis
 from qutip.measurement import measurement_statistics
 from qutip_qip.operations import expand_operator
 
-__all__ = ["Measurement", "Mz"]
+__all__ = ["Mz"]
 
 
 class Measurement:
@@ -38,7 +38,8 @@ class Measurement:
                 stacklevel=2,
             )
 
-    def measurement_comp_basis(self, state, targets):
+    @classmethod
+    def measurement_comp_basis(cls, state, qubits):
         """
         Measures a particular qubit (determined by the target)
         whose ket vector/ density matrix is specified in the
@@ -50,7 +51,7 @@ class Measurement:
         state : ket or oper
                 state to be measured on specified by
                 ket vector or density matrix
-        targets : list or tuple of int
+        qubits : list or tuple of int
                 The indices of the qubits to be measured.
 
         Returns
@@ -65,7 +66,7 @@ class Measurement:
         """
 
         n = int(np.log2(state.shape[0]))
-        target = targets[0]
+        target = qubits[0]
         if target < n:
             op0 = basis(2, 0) * basis(2, 0).dag()
             op1 = basis(2, 1) * basis(2, 1).dag()
@@ -74,7 +75,7 @@ class Measurement:
             raise ValueError("target is not valid")
 
         measurement_ops = [
-            expand_operator(op, dims=[2] * n, targets=targets) for op in measurement_ops
+            expand_operator(op, dims=[2] * n, targets=qubits) for op in measurement_ops
         ]
 
         measurement_tol = qutip.settings.core["atol"] ** 2
