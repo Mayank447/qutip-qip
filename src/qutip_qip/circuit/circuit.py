@@ -252,7 +252,7 @@ class QubitCircuit:
         self,
         measurement: Type[Measurement],
         targets: int | IntSequence,
-        classical_store: int,
+        classical_store: int | IntSequence,
         index: None = None,
     ):
         """
@@ -264,7 +264,7 @@ class QubitCircuit:
             `Measurement` subclasses
         targets : int or Sequence of int
             Gate targets
-        classical_store : int
+        classical_store : int or Sequence of int
             Classical register where result of measurement is stored.
         index : list
             Positions to add the gate.

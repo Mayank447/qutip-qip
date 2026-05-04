@@ -291,13 +291,14 @@ QuTiP-QIP offers three distinct methods for visualizing quantum circuits. Below 
 
   from qutip_qip.circuit import QubitCircuit
   from qutip_qip.operations.gates import H, CX, ISWAP
+  from qutip_qip.operations.measurement import Mz
 
   # create the quantum circuit
   qc = QubitCircuit(2, num_cbits=1)
   qc.add_gate(CX, controls=0, targets=1)
   qc.add_gate(H, targets=1)
   qc.add_gate(ISWAP, targets=[0,1])
-  qc.add_measurement("M0", targets=1, classical_store=0)
+  qc.add_measurement(Mz, targets=1, classical_store=0)
 
   qc.draw("matplotlib", dpi=300)
 

@@ -227,7 +227,7 @@ class CircuitSimulator:
             targets = circ_instruction.qubits
             classical_store = circ_instruction.cbits
             state = self._apply_measurement(
-                circ_instruction.operation, targets, classical_store, current_state
+                circ_instruction.operation, targets, classical_store
             )
 
         elif self.qc.instructions[self._op_index].is_gate_instruction():
@@ -312,7 +312,7 @@ class CircuitSimulator:
         )
         return state
 
-    def _apply_measurement(self, operation, qubits, cbits, state):
+    def _apply_measurement(self, operation, qubits, cbits):
         """
         Applies measurement gate specified by operation to current state.
 
@@ -325,8 +325,6 @@ class CircuitSimulator:
         cbits : tuple of int
             The indices of the classical registers where the measurement
             results will be stored.
-        state : qutip.Qobj
-            The current state of the quantum circuit (ket or density matrix).
 
         Returns
         -------
