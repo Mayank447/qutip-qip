@@ -16,7 +16,7 @@ build:
 
     pre_build:
       # Each command is executed in a new shell process
-      - cd doc; python source/tutorials-website/create_tutorials_html.py
+      - cd doc; python source/tutorials-website/create_tutorials_rst.py
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
