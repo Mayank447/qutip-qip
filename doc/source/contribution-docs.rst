@@ -4,6 +4,69 @@
 Contributing to the documentation
 *********************************
 
+We place high importance on the consistency and readability of documentation. So we treat our
+documentation like we treat our code, we aim to improve it as often as possible.
+
+
+The Documentation Process
+=========================
+
+We work from the master branch of the repository because just as it has the latest code, it has the latest and accurate documentation.
+
+Although the documentation is intended to be read as HTML by a browser, we edit it as a collection of plain text files written
+in the reStructuredText markup language (*.rst*) for flexibility. If you have written some markdown before,
+writing rst should be quite similar as both rst, markdown have a common origin.
+
+To convert this lightly-formatted plain-text documentation into HTML, PDF, and any other output format, we use the Sphinx documentation system.
+
+
+Building the documentation
+==========================
+
+You can install Sphinx and required documentation dependencies using the command,
+
+.. code-block:: bash
+
+    pip install --group doc
+
+
+Under the ``doc`` directory, use
+
+.. code-block:: bash
+
+    make html
+
+to build the documentation in html format. The build is saved under the directory ``doc/_build/html`` and can
+be viewed by opening the ``index.html`` in a browser.
+
+
+How the documentation is organized
+==================================
+
+The documentation is organized into three categories:
+
+- **Tutorials** take the reader by the hand through a series of steps to create something.
+  
+  The important thing in a tutorial is to help the reader achieve something useful, preferably
+  as early as possible, in order to give them confidence.
+
+  Explain the nature of the problem we’re solving, so that the reader understands what
+  we’re trying to achieve. Don’t feel that you need to begin with explanations of how
+  things work - what matters is what the reader does, not what you explain. It can be
+  helpful to refer back to what you’ve done and explain afterward.
+
+- **User guide** aim to explain a concept or subject at a fairly high level.
+ 
+  Use examples and don’t be reluctant to explain things that seem very basic to you - it might be the explanation someone else needs.
+  Providing background context helps a newcomer connect the topic to things that they already know.
+  At times instead of going into depth, you can link to reference material for interested users.
+
+- **API dcoumentation** contain technical references for APIs and the internal workings of qutip-qip.
+
+  Keep reference material tightly focused on the subject. Assume that the reader already understands the basic concepts involved but needs to know how qutip-qip does it.
+  Reference guides aren’t the place for general explanation. If you find yourself explaining basic concepts, you may want to move that material to a topic guide.
+
+.. TODO: Add developer guide in the future
 
 The user guide provides an overview of the package's functionality.
 The guide is composed of individual reStructuredText (**.rst**)
@@ -21,34 +84,6 @@ including but not limited to
 `plot <https://matplotlib.org/3.1.1/devel/plot_directive.html>`_.
 Additional extensions can be configured in the `conf.py <https://github.com/qutip/qutip-doc/blob/master/conf.py>`_ file.
 
-.. _build_doc:
-
-Building the documentation
-==========================
-
-To build and test the documentation, the following packages are required:
-
-.. code-block:: bash
-
-    sphinx numpydoc sphinx_rtd_theme doctest
-
-Under the ``doc`` directory, use
-
-.. code-block:: bash
-
-    make html
-
-to build the documentation in html format. The build is saved under the directory ``doc/_build/html``
-
-Use the command
-
-.. code-block:: bash
-
-    make doctest
-
-to run a test for the documentation.
-
-.. _directives.rst:
 
 Directives
 ==========
@@ -65,7 +100,6 @@ directives while making a user guide.
 
 Doctest
 -------
-
 
 The doctest directive enables tests on interactive code examples. The simplest way
 to do this is by specifying a prompt along with it's respective output: ::
@@ -84,6 +118,13 @@ This is rendered in the documentation as follows:
     >>> a
     2
 
+Under the ``doc`` directory, use the command
+
+.. code-block:: bash
+
+    make doctest
+
+to test all the code examples in the documentation
 
 While specifying code examples under the **.. doctest::** directive,
 either all statements must be specified by the **>>>** prompt or without it. For
