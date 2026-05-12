@@ -6,6 +6,7 @@ import warnings
 from copy import deepcopy
 from collections.abc import Iterable
 from math import pi  # Don't remove
+from typing import Self
 
 import numpy as np
 import qutip_qip.operations.gates as gates
@@ -14,6 +15,7 @@ from qutip_qip.operations import get_unitary_gate
 from qutip_qip.operations.measurement import Mz
 from qutip_qip.typing import SequenceLike
 from qutip_qip.qasm._tokenizer import _tokenize
+from qutip_qip.typing import IntSequence
 
 
 class QasmGate:
@@ -21,7 +23,9 @@ class QasmGate:
     Class which stores the gate definitions as specified in the QASM file.
     """
 
-    def __init__(self, name: str, gate_args: list[str], gate_regs: list[str]) -> None:
+    def __init__(
+        self: Self, name: str, gate_args: list[str], gate_regs: list[str]
+    ) -> None:
         self.name = name
         self.gate_args = gate_args
         self.gate_regs = gate_regs
@@ -58,7 +62,9 @@ class QasmProcessor:
     Class which holds variables used in processing QASM code.
     """
 
-    def __init__(self, commands, mode="default", version="2.0"):
+    def __init__(
+        self: Self, commands: list[str], mode: str = "default", version: str = "2.0"
+    ) -> None:
         self.qubit_regs = {}
         self.cbit_regs = {}
         self.num_qubits = 0
@@ -109,7 +115,7 @@ class QasmProcessor:
             self.qasm_gates[gate] = QasmGate("U", ["alpha", "beta", "gamma"], ["q"])
         self.commands = commands
 
-    def _process_includes(self):
+    def _process_includes(self: Self):
         """
         QASM allows for code to be specified in additional files with the
         ".inc" extension, especially to specify gate definitions in terms of
@@ -159,7 +165,7 @@ class QasmProcessor:
         expanded_commands += self.commands[prev_index:]
         self.commands = expanded_commands
 
-    def _initialize_pass(self):
+    def _initialize_pass(self: Self) -> None:
         """
         Passes through the tokenized commands, create QasmGate objects for
         each user-defined gate, process register declarations.
@@ -248,7 +254,7 @@ class QasmProcessor:
 
         self.commands = [self.commands[i] for i in unprocessed]
 
-    def _custom_gate(self, qc_temp, gate_call):
+    def _custom_gate(self, qc_temp: QubitCircuit, gate_call: list[str]) -> None:
         """
         Recursively process a custom-defined gate with specified arguments
         to produce a dummy circuit with all the gates in the custom-defined
@@ -295,7 +301,7 @@ class QasmProcessor:
             else:
                 self._custom_gate(qc_temp, [name, com_args, com_regs])
 
-    def _regs_processor(self, regs, reg_type):
+    def _regs_processor(self, regs: list[str], reg_type: str):
         """
         Process register tokens: map them to the :class:`.QubitCircuit` indices
         of the respective registers.
@@ -403,14 +409,14 @@ class QasmProcessor:
                 return [new_regs]
 
     def _add_qiskit_gates(
-        self,
-        qc,
-        name,
-        regs,
-        args=None,
-        classical_controls=(),
-        classical_control_value=None,
-    ):
+        self: Self,
+        qc: QubitCircuit,
+        name: str,
+        regs: IntSequence,
+        args: float | tuple[float] | None = None,
+        classical_controls: int | IntSequence = (),
+        classical_control_value: int | None = None,
+    ) -> None:
         """
         Add any gates that are pre-defined in qiskit-style exported
         qasm file with included "qelib1.inc".
@@ -445,10 +451,6 @@ class QasmProcessor:
             "sdg": gates.Sdag,
             "tdg": gates.Tdag,
         }
-        if len(args) == 0:
-            args = None
-        elif len(args) == 1:
-            args = args[0]
 
         if name == "u3":
             qc.add_gate(
@@ -459,7 +461,7 @@ class QasmProcessor:
             )
         elif name == "u2":
             qc.add_gate(
-                gates.QASMU(np.pi / 2, args[0], args[1]),
+                gates.QASMU((np.pi / 2, args[0], args[1])),
                 targets=regs[0],
                 classical_controls=classical_controls,
                 classical_control_value=classical_control_value,
@@ -579,14 +581,14 @@ class QasmProcessor:
             )
 
     def _add_predefined_gates(
-        self,
-        qc,
-        name,
-        com_regs,
-        com_args,
-        classical_controls=(),
-        classical_control_value=None,
-    ):
+        self: Self,
+        qc: QubitCircuit,
+        name: str,
+        com_regs: IntSequence,
+        com_args: float | tuple[float] | None = None,
+        classical_controls: int | IntSequence = (),
+        classical_control_value: int | None = None,
+    ) -> None:
         """
         Add any gates that are pre-defined and/or inbuilt
         in our circuit.
@@ -597,9 +599,9 @@ class QasmProcessor:
             the circuit to which the gate is added.
         name : str
             name of gate to be added.
-        regs : list of int
+        com_regs : list of int
             list of qubit register indices to add gates to.
-        args : float, optional
+        com_args : float, optional
             value of args supplied to the gate.
         classical_controls : list of int, optional
             indices of classical bits to control gate on.
@@ -638,11 +640,11 @@ class QasmProcessor:
 
     def _gate_add(
         self,
-        qc,
-        command,
-        classical_controls=(),
-        classical_control_value=None,
-    ):
+        qc: QubitCircuit,
+        command: list[str],
+        classical_controls: int | IntSequence = (),
+        classical_control_value: int | None = None,
+    ) -> None:
         """
         Add gates to :class:`.QubitCircuit` from processed tokens,
         define custom gates if necessary.
@@ -711,7 +713,7 @@ class QasmProcessor:
                         classical_control_value=classical_control_value,
                     )
 
-    def _final_pass(self, qc):
+    def _final_pass(self, qc: QubitCircuit) -> None:
         """
         Take a blank circuit, add all the gates and measurements specified
         by QASM.
