@@ -1,0 +1,32 @@
+# Ensure all text files use LF on checkout
+* text eol=lf
+
+# Explicitly set line endings for Windows batch files
+*.bat eol=crlf
+
+# These files are text and should be normalized (Convert crlf => lf)
+*.gitattributes text
+.gitignore      text
+*.md            text diff=markdown
+
+# Treat Images as binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+
+# Python files
+*.py     text diff=python
+*.pyx    text diff=python
+*.pxd    text diff=python
+*.py3    text diff=python
+*.pyw    text diff=python
+*.pyz    text diff=python
+*.pyi    text diff=python
+
+# Python Binary files
+*.p      binary
+*.pkl    binary
+*.pickle binary
+*.pyc    binary export-ignore
+*.pyo    binary export-ignore
+*.pyd    binary
