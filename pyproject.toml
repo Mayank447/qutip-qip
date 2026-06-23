@@ -68,7 +68,7 @@ Donate = "https://github.com/sponsors/qutip"
 
 [project.optional-dependencies]
 graphics = ["matplotlib>=3.6"]
-control = ["qutip-qtrl>=0.1.5"]
+control = ["qutip-qtrl>=0.2"]
 qiskit = ["qiskit>=2.0"]
 full = [
     "qutip-qip[graphics,qiskit,control]",
