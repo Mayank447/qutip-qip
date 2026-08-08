@@ -10,7 +10,7 @@ from typing import Iterable, Type, Self
 from qutip import qeye, Qobj, basis, tensor
 import numpy as np
 
-from qutip_qip.circuit import CircuitSimulator, OpInstruction
+from qutip_qip.circuit import CircuitSimulator
 from qutip_qip.circuit._decompose import (
     _resolve_to_universal,
     _resolve_2q_basis,
@@ -27,6 +27,7 @@ from qutip_qip.operations import (
     Gate,
     Measurement,
     Op,
+    OpInstruction,
     expand_operator,
     get_unitary_gate,
 )
