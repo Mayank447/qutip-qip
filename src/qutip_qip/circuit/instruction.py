@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Type
 from dataclasses import dataclass
 import warnings
-from qutip_qip.circuit.conditional import Conditional, Label, Cbnz, Cbz
-from qutip_qip.operations import Gate, Measurement, Op
+from qutip_qip.operations.conditional import Conditional, Label, Cbnz, Cbz
+from qutip_qip.operations import Gate, Measurement
 
 
 def _validate_non_negative_int_tuple(T: any, txt: str = ""):

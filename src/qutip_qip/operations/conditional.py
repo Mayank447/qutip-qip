@@ -24,6 +24,8 @@ class Conditional(Op):
         object.__setattr__(self, "label", label)
 
 
+# TODO: Implement this in future using NOT + Cbnz
+# So we won't require 3 classes, only one
 class Cbz(Conditional):
     "Conditional branch on zero"
 

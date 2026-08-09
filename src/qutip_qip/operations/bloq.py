@@ -3,7 +3,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from uuid import uuid4
 
-from qutip_qip.operations import Op, OpInstruction
+from qutip_qip.operations import OpInstruction
+from qutip_qip.operations.conditional import Cbz, Cbnz
 from qutip_qip.typing import Int
 from qutip_qip.utils import check_limit
 
@@ -61,12 +62,20 @@ class BloqBuilder:
         return len(self._qreg_dim)
 
     @property
+    def num_aux_qreg(self) -> int:
+        return len(self._aux_qreg_dim)
+
+    @property
     def num_creg(self) -> int:
         return self._num_creg
 
     @property
-    def instructions(self) -> list[OpInstruction]:
-        return self._op_instructions
+    def num_aux_creg(self) -> int:
+        return self._num_aux_creg
+
+    @property
+    def instructions(self) -> tuple[OpInstruction, ...]:
+        return tuple(self._op_instructions)
 
     @property
     def global_phase(self) -> float:
@@ -76,25 +85,72 @@ class BloqBuilder:
         self._global_phase += phase
         self._global_phase %= 2 * math.pi
 
-    def add_aux_qreg(self, count: int = 1, dim: int = 2) -> tuple[int, ...]: ...
+    def add_aux_qreg(self, count: Int = 1, dim: Int = 2) -> None:
+        if not (isinstance(count, Int) and count > 0):
+            raise TypeError(f"count must be of type int, got {count}")
+
+        if not (isinstance(dim, Int) and dim > 0):
+            raise TypeError(f"dim must be of type int, got {dim}")
+
+        self._aux_qreg_dim.append([dim] * count)
+
+    @property
+    def qreg(self) -> tuple[int, ...]:
+        return tuple(range(self.num_qreg))
+
+    @property
+    def aux_qreg(self) -> tuple[int, ...]:
+        return tuple(range(self.num_qreg, self.num_qreg + self.num_aux_qreg))
+
+    @property
+    def creg(self) -> tuple[int, ...]:
+        return tuple(range(self.num_creg))
+
+    @property
+    def aux_creg(self) -> tuple[int, ...]:
+        return tuple(range(self.num_qcreg, self.num_creg + self.num_aux_creg))
 
     def add_op(self, op, qreg=(), creg=()) -> None:
         # Type checking is handled internally within OpInstruction
         # We just check each element of qreg, creg are within the limit
-        if type(qreg, Int):
+        if isinstance(qreg, Int):
             qreg = [qreg]
-
-        if type(creg, Int):
+        if isinstance(creg, Int):
             creg = [creg]
 
-        check_limit("qreg", qreg, 0, self.num_qreg - 1)
-        check_limit("creg", creg, 0, self.num_creg - 1)
+        check_limit("qreg", qreg, 0, self.num_qreg + self.num_aux_qreg - 1)
+        check_limit("creg", creg, 0, self.num_creg + self.num_aux_creg - 1)
 
         self._op_instructions.append(
             OpInstruction(op=op, qreg=tuple(qreg), creg=tuple(creg))
         )
 
     @contextmanager
-    def if_test(self, creg, value: int, check="EQ") -> None: ...
+    def if_test(self, creg, value: Int) -> None:
+        if type(creg) is Int:
+            creg = [creg]
 
-    def build(self) -> Bloq: ...
+        # TODO test each element in creg is an int
+        check_limit("creg", creg, 0, self.num_creg + self.num_aux_creg - 1)
+
+        if (value < 0) or (value >= 2 ** len(creg)):
+            raise ValueError("Check value not in the limit")
+
+        label = uuid4().hex
+        for index, cbit in enumerate(creg):
+            if (value >> index) & 1 == 1:
+                # If does not match for cbit_value=1, then branch to label (don't execute the conditional if)
+                self.add_op(Cbz(label), creg=creg)
+            else:
+                # If does not match for cbit_value=0, then branch to label
+                self.add_op(Cbnz(label), creg=creg)
+
+    def build(self) -> Bloq:
+        return Bloq(
+            qreg_dim=self._qreg_dim,
+            num_creg=self.num_creg,
+            aux_qreg_dim=self._aux_qreg_dim,
+            num_aux_creg=self.num_aux_qreg,
+            global_phase=self.global_phase,
+            instructions=self.instructions,
+        )

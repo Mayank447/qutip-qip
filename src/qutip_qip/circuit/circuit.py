@@ -22,7 +22,7 @@ from qutip_qip.circuit.instruction import (
     LabelInstruction,
     MeasurementInstruction,
 )
-from qutip_qip.circuit.conditional import Cbnz, Cbz, Conditional, Label
+from qutip_qip.operations.conditional import Cbnz, Cbz, Conditional, Label
 from qutip_qip.operations import (
     Gate,
     Measurement,
