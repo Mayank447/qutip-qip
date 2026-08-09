@@ -2,6 +2,9 @@ from dataclasses import dataclass, field
 from typing import Generic, TypeVar
 from uuid import uuid4
 
+from qutip_qip.typing import Int
+from qutip_qip.utils import convert_type_input_to_sequence
+
 # TODO: Add typing bound constraint to this
 P = TypeVar("P")
 
@@ -46,4 +49,8 @@ class OpInstruction:
     style: dict = field(default_factory=dict)  # For circuit draw
 
     def __post_init__(self):
-        pass
+        if not (isinstance(self.op, Op) or issubclass(self.op, Op)):
+            raise TypeError("op must be a subclass or instance of type Op")
+
+        convert_type_input_to_sequence(self.qreg, "qreg", Int)
+        convert_type_input_to_sequence(self.creg, "creg", Int)
