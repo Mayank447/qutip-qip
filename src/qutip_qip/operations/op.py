@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Generic, TypeVar
+from uuid import uuid4
 
 # TODO: Add typing bound constraint to this
 P = TypeVar("P")
@@ -7,6 +8,7 @@ P = TypeVar("P")
 
 @dataclass(frozen=True, slots=True)
 class Op:
+    uuid: str = field(default_factory=lambda: uuid4().hex)
     _name: str
     params: tuple[P, ...] = ()
 
@@ -45,6 +47,3 @@ class OpInstruction:
 
     def __post_init__(self):
         pass
-
-    def __str__(self):
-        print(f"op={self.op}, qreg={self.qreg}, creg={self.creg}, style({self.style})")
