@@ -1,3 +1,4 @@
+from abc import ABC
 from dataclasses import dataclass, field
 from typing import Generic, TypeVar
 from uuid import uuid4
@@ -22,11 +23,11 @@ class Op:
         else:
             return f"{self._name}({', '.join(map(str, self.params))})"
 
-    creg_count: int = 0
     qreg_dim: tuple[int, ...] = ()
+    num_creg: int = 0
 
     @property
-    def qreg_count(self) -> int:
+    def num_qreg(self) -> int:
         return len(self.qreg_dim)
 
     unitary: bool = True
@@ -35,7 +36,7 @@ class Op:
 
 # Think of Parametric Op as Op Factory, takes params and returns a Op
 # TODO: Update this typing when updating min Python version to 3.12
-class ParametricOp(Generic[P]):
+class ParametricOp(ABC, Generic[P]):
     def __call__(self, *params) -> Op: ...
     def validate_params(self, *params: P) -> None: ...
 
