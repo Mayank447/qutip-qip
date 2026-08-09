@@ -5,7 +5,7 @@ from typing import Generic, TypeVar
 P = TypeVar("P")
 
 
-@dataclass(frozen=True)
+@dataclass
 class Op:
     _name: str
     params: tuple[P, ...] = ()
@@ -17,8 +17,12 @@ class Op:
         else:
             return f"{self._name}({', '.join(map(str, self.params))})"
 
+    @name.setter
+    def name(self, new_name: str) -> None:
+        self._name = new_name
+
     creg_count: int = 0
-    qreg_dim: tuple[int, ...]
+    qreg_dim: tuple[int, ...] = ()
 
     @property
     def qreg_count(self) -> int:

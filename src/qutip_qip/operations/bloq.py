@@ -3,14 +3,14 @@ from dataclasses import dataclass
 from qutip_qip.operations import OpInstruction
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Bloq:
-    qreg_dim: tuple[int, ...]
+    qreg_dim: tuple[int, ...] = ()
     aux_qreg_dim: tuple[int, ...] = ()
 
-    qreg_count: int
-    creg_count: int
-    instructions: tuple[OpInstruction, ...]
+    qreg_count: int = 0
+    creg_count: int = 0
+    instructions: tuple[OpInstruction, ...] = ()
 
     # qreg_dim, qreg_count, creg_count etc. has been copied here, although
     # these we can directly access from the associated Op, so that Op and Bloq remain separate
