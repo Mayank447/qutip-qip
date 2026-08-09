@@ -1,3 +1,4 @@
+import math
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from uuid import uuid4
@@ -16,22 +17,53 @@ class Bloq:
     global_phase: float = 0.0
     instructions: tuple[OpInstruction, ...] = ()
 
-    # qreg_dim, qreg_count, creg_count etc. has been copied here, although these
-    # can be directly access from the associated Op, they are separate so that Op and Bloq
-    # remain separate. The only linking between them happens via the BloqRepository.
+    # Op and Bloq are kept separate and qreg_dim, qreg_count, creg_count etc. have been copied here.
+    # The only linking between them happens via the BloqRepository.
 
 
 class BloqBuilder:
-    def __init__(self, num_qreg: int, num_creg: int = 0) -> None:
-        self.num_qreg = num_qreg
-        self.num_creg = num_creg
+    def __init__(
+        self, num_qreg: int, num_creg: int = 0, qreg_dim: tuple[int, ...] | None = None
+    ) -> None:
+        self._num_qreg = num_qreg
+        self._num_creg = num_creg
+        self._op_instructions = []
+        self._global_phase = 0.0
+
+        if (qreg_dim is not None) and (len(qreg_dim) != num_qreg):
+            raise ValueError(
+                f"Lenght of qreg_dim={qreg_dim} must be equal to num_qreg={num_qreg}"
+            )
+
+        if self._qreg_dim is None:
+            self._qreg_dim = (2,) * num_qreg
+        else:
+            self._qreg_dim = tuple(qreg_dim)
+
+    @property
+    def num_qreg(self) -> int:
+        return self._num_qreg
+
+    @property
+    def num_creg(self) -> int:
+        return self._num_creg
+
+    @property
+    def instructions(self) -> list[OpInstruction]:
+        return self._op_instructions
+
+    @property
+    def global_phase(self) -> float:
+        return self._global_phase
+
+    def add_global_phase(self, phase: float) -> None:
+        self._global_phase += phase
+        self._global_phase %= 2 * math.pi
 
     def add_aux_qreg(self, count=1, dim=2) -> tuple[int, ...]: ...
     def add_op(self, op, qregs, cregs=()) -> None: ...
 
     @contextmanager
     def if_test(self, creg, value: int, check="EQ") -> None: ...
-
-    def add_global_phase(self, phase: float) -> None: ...
 
     def build(self) -> Bloq: ...
