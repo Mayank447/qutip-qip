@@ -33,8 +33,17 @@ class Bloq:
 
 
 class BloqBuilder:
+    __slots__ = (
+        "_qreg_dim",
+        "_aux_qreg_dim",
+        "_num_creg",
+        "_num_aux_creg",
+        "_global_phase",
+        "_op_instructions",
+    )
+
     def __init__(
-        self, num_qreg: int, num_creg: int = 0, qreg_dim: tuple[int, ...] | None = None
+        self, num_qreg: int, num_creg: int = 0, qreg_dim: tuple[int, ...] = ()
     ) -> None:
         if num_qreg < 0:
             raise ValueError("num_qreg must be greater than or equal to 0.")
@@ -42,13 +51,13 @@ class BloqBuilder:
         if num_creg < 0:
             raise ValueError("num_creg must be greater than or equal to 0.")
 
-        if qreg_dim and len(qreg_dim) != num_qreg:
+        if len(qreg_dim) and len(qreg_dim) != num_qreg:
             raise ValueError(
                 f"Lenght of qreg_dim={qreg_dim} must be equal to num_qreg={num_qreg}"
             )
 
         self._qreg_dim = qreg_dim
-        if self._qreg_dim is None:
+        if len(self._qreg_dim) == 0:
             self._qreg_dim = (2,) * num_qreg
 
         self._aux_qreg_dim = []
@@ -93,6 +102,11 @@ class BloqBuilder:
             raise TypeError(f"dim must be of type int, got {dim}")
 
         self._aux_qreg_dim.append([dim] * count)
+
+    def add_aux_creg(self, count: Int = 1) -> None:
+        if not (isinstance(count, Int) and count > 0):
+            raise TypeError(f"count must be of type int, got {count}")
+        self._num_aux_creg += count
 
     @property
     def qreg(self) -> tuple[int, ...]:
