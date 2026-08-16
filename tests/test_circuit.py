@@ -322,11 +322,12 @@ class TestQubitCircuit:
         assert qc.instructions[0].qubits[0] == 0
         assert qc.instructions[0].cbits[0] == 0
         assert isinstance(qc.instructions[3].operation, Measurement)
-        assert qc.instructions[5].cbits[0] == 2
+        assert qc.instructions[5].cbits[0] == 1
 
         # checking if gates are added correctly with measurements
         assert qc.instructions[2].operation == gates.TOFFOLI
-        assert qc.instructions[4].cbits == (0, 1)
+        assert qc.instructions[4].cbits == (0,)
+        assert qc.instructions[5].cbits == (1,)
 
     @pytest.mark.parametrize("gate", [gates.X, gates.Y, gates.Z, gates.S, gates.T])
     def test_exceptions(self, gate):
