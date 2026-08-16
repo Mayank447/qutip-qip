@@ -53,7 +53,7 @@ class BloqBuilder:
 
         if len(qreg_dim) and len(qreg_dim) != num_qreg:
             raise ValueError(
-                f"Lenght of qreg_dim={qreg_dim} must be equal to num_qreg={num_qreg}"
+                f"Length of qreg_dim={qreg_dim} must be equal to num_qreg={num_qreg}"
             )
 
         self._qreg_dim = qreg_dim
@@ -148,7 +148,8 @@ class BloqBuilder:
         check_limit("creg", creg, 0, self.num_creg + self.num_aux_creg - 1)
 
         label = Label(uuid4().hex)
-        lg_check_value = 2 ** len(creg)
+        num_bits = len(creg)
+        lg_check_value = 2**num_bits
 
         if check == ClassicalControlCheck.EQ:
             if (value < 0) or (value >= lg_check_value):
@@ -156,7 +157,7 @@ class BloqBuilder:
 
             else:
                 for index, cbit in enumerate(creg):
-                    if (value >> index) & 1 == 1:
+                    if (value >> (num_bits - 1 - index)) & 1 == 1:  # MSB first ordering
                         # If does not match for cbit_value=1, then branch to label (don't execute the conditional if)
                         self.add_op(Cbz(label=label), creg=cbit)
                     else:
@@ -172,7 +173,7 @@ class BloqBuilder:
 
             else:
                 for index, cbit in enumerate(creg):
-                    target_bit_value = (value >> index) & 1
+                    target_bit_value = (value >> (num_bits - 1 - index)) & 1
 
                     if target_bit_value == 1:
                         # If a mismatch match for cbit_value=1, then branch to neqlabel
@@ -199,7 +200,7 @@ class BloqBuilder:
                 gt_label = Label(uuid4().hex)
 
                 for index, cbit in enumerate(creg):
-                    target_bit_value = (value >> index) & 1
+                    target_bit_value = (value >> (num_bits - 1 - index)) & 1
 
                     # We break at first point of discontinuity (but to different labels)
                     if target_bit_value == 1:
@@ -226,7 +227,7 @@ class BloqBuilder:
             ):  # for value larger than 2^m, condition is always true
                 lt_label = Label(uuid4().hex)
                 for index, cbit in enumerate(creg):
-                    target_bit_value = (value >> index) & 1
+                    target_bit_value = (value >> (num_bits - 1 - index)) & 1
 
                     # We break at first point of discontinuity (but to different labels)
                     if target_bit_value == 1:
