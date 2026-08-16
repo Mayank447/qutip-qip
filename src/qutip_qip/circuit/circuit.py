@@ -382,7 +382,7 @@ class QubitCircuit:
             )
         )
 
-        self._builder.add_op(
+        self.add_op(
             op=measurement,
             qreg=tuple(targets),
             creg=tuple(classical_store),

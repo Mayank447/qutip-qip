@@ -51,11 +51,11 @@ class OpInstruction:
     style: dict = field(default_factory=dict)  # For circuit draw
 
     def __post_init__(self):
-        # TODO: Enable this after Gate, Measurement class also inherit from Op
-        # if not (isinstance(self.op, Op)) or (
-        #     (isinstance(self.op, type) and issubclass(self.op, Op))
-        # ):
-        #     raise TypeError("op must be a subclass or instance of type Op")
+        if not (
+            isinstance(self.op, Op)
+            or ((isinstance(self.op, type) and issubclass(self.op, Op)))
+        ):
+            raise TypeError("op must be a subclass or instance of type Op")
 
         convert_type_input_to_sequence(Int, "qreg", self.qreg)
         convert_type_input_to_sequence(Int, "creg", self.creg)
