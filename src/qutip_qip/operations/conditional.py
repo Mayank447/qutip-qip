@@ -7,10 +7,10 @@ class Label(Op):
     """A static marker in the instruction list."""
 
     def __init__(self, name):
-        super().__init__(_name=name)
+        super(Label, self).__init__(_name=name)
 
 
-@dataclass(frozen=True, slots=True, kw_only=True)
+# @dataclass
 class Conditional(Op):
     """Classical conditional control flow statements"""
 

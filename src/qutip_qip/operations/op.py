@@ -10,7 +10,8 @@ from qutip_qip.utils import convert_type_input_to_sequence
 P = TypeVar("P")
 
 
-@dataclass(frozen=True, slots=True)
+# @dataclass(frozen=True)  # TODO: Add slots when minimum Python is bumped to 3.14
+@dataclass
 class Op:
     _name: str
     uuid: str = field(default_factory=lambda: uuid4().hex)
