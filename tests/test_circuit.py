@@ -217,9 +217,11 @@ class TestQubitCircuit:
         qc.add_gate(gates.RY(1.570796), targets=4)
         qc.add_gate(gates.RY(1.570796), targets=5)
         qc.add_gate(gates.CRX(np.pi / 2), controls=[1], targets=[2])
+        qc.build()
 
         qc1 = QubitCircuit(6, num_cbits=2)
         qc1.add_circuit(qc)
+        qc1.build()
 
         # Test if all gates and measurements are added
         assert len(qc1.instructions) == len(qc.instructions)
@@ -249,6 +251,7 @@ class TestQubitCircuit:
 
         qc2 = QubitCircuit(8, num_cbits=2)
         qc2.add_circuit(qc, start=2)
+        qc2.build()
 
         # Test if all gates are added
         assert len(qc2.instructions) == len(qc.instructions)

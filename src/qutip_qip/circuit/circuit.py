@@ -584,29 +584,22 @@ class QubitCircuit:
         start : int
             The qubit on which the first gate is applied.
         """
+        warnings.warn(
+            "QubitCircuit.add_circuit has been deprecated, instead use Ops",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         if self.num_qubits - start < qc.num_qubits:
             raise NotImplementedError("Targets exceed number of qubits.")
 
-        for circuit_op in qc.instructions:
-            if circuit_op.is_gate_instruction():
-                self.add_gate(
-                    circuit_op.operation,
-                    targets=[start + t for t in circuit_op.targets],
-                    controls=[start + c for c in circuit_op.controls],
-                    classical_controls=circuit_op.cbits,
-                    classical_control_value=circuit_op.cbits_ctrl_value,
-                )
-
-            elif circuit_op.is_measurement_instruction():
-                self.add_measurement(
-                    circuit_op.operation,
-                    targets=[target + start for target in circuit_op.qubits],
-                    classical_store=list(circuit_op.cbits),
-                )
-
-            else:
-                raise TypeError(f"The circuit to be added contains unknown \
-                    operator {circuit_op[0]}")
+        for circuit_op in qc.ops:
+            self.add_op(
+                op=circuit_op.op,
+                qreg=[start + t for t in circuit_op.qreg],
+                creg=circuit_op.creg,
+                style=circuit_op.style,
+            )
 
     def adjacent_gates(*args, **kwargs):
         raise AttributeError(
