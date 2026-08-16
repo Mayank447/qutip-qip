@@ -1,6 +1,16 @@
 from dataclasses import dataclass
+from enum import StrEnum
 
 from qutip_qip.operations import Op
+
+
+class ClassicalControlCheck(StrEnum):
+    EQ = "EQ"
+    NEQ = "NEQ"
+    GT = "GT"
+    LT = "LT"
+    GTE = "GTE"  # This can be subimplemented using GT - 1
+    LTE = "LTE"
 
 
 class Label(Op):

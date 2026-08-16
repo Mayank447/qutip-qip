@@ -4,8 +4,6 @@ Quantum circuit representation and simulation.
 
 import warnings
 import inspect
-from contextlib import contextmanager
-from enum import StrEnum
 from typing import Iterable, Type, Self
 from qutip import qeye, Qobj, basis, tensor
 import numpy as np
@@ -22,12 +20,13 @@ from qutip_qip.circuit.instruction import (
     LabelInstruction,
     MeasurementInstruction,
 )
-from qutip_qip.operations.conditional import Cbnz, Cbz, Conditional, Label
+from qutip_qip.operations.conditional import Conditional, Label, ClassicalControlCheck
 from qutip_qip.operations import (
     BloqBuilder,
     Gate,
     Measurement,
     Op,
+    OpInstruction,
     expand_operator,
     get_unitary_gate,
 )
@@ -47,15 +46,6 @@ except ImportError:
 
     def DisplaySVG(data, *args, **kwargs):
         return data
-
-
-class ClassicalControlCheck(StrEnum):
-    EQ = "EQ"
-    NEQ = "NEQ"
-    GT = "GT"
-    LT = "LT"
-    GTE = "GTE"  # This can be subimplemented using GT - 1
-    LTE = "LTE"
 
 
 class QubitCircuit:
@@ -101,9 +91,7 @@ class QubitCircuit:
         self._builder = BloqBuilder(num_qubits, num_cbits, qreg_dim=self.dims)
 
         self.reverse_states = reverse_states
-        self._ops: list[Op] = []
         self._instructions: list[CircuitInstruction] = []
-        self._label_counter = 0
 
         if input_states:
             self.input_states = input_states
@@ -234,6 +222,10 @@ class QubitCircuit:
         self._user_gates = gate_classes
 
     @property
+    def ops(self) -> tuple[OpInstruction, ...]:
+        return self._builder.instructions
+
+    @property
     def instructions(self) -> list[CircuitInstruction]:
         return self._instructions
 
@@ -271,14 +263,13 @@ class QubitCircuit:
             for i in targets:
                 self.output_states[i] = state
 
-    @contextmanager
     def if_test(
         self: Self,
         cbits: int | IntSequence,
         value: int,
         check: ClassicalControlCheck = "EQ",
     ):
-        self._builder.if_test(cbits, value)
+        return self._builder.if_test(cbits, value, check)
 
     def add_op(
         self: Self,

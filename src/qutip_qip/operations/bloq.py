@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from uuid import uuid4
 
 from qutip_qip.operations import OpInstruction
-from qutip_qip.operations.conditional import Cbz, Cbnz
+from qutip_qip.operations.conditional import Cbz, Cbnz, ClassicalControlCheck, Label
 from qutip_qip.typing import Int
 from qutip_qip.utils import check_limit
 
@@ -140,24 +140,111 @@ class BloqBuilder:
         )
 
     @contextmanager
-    def if_test(self, creg, value: Int) -> None:
+    def if_test(self, creg, value: Int, check: ClassicalControlCheck = "EQ") -> None:
         if isinstance(creg, Int):
             creg = [creg]
 
         # TODO test each element in creg is an int
         check_limit("creg", creg, 0, self.num_creg + self.num_aux_creg - 1)
 
-        if (value < 0) or (value >= 2 ** len(creg)):
-            raise ValueError("Check value not in the limit")
+        label = Label(uuid4().hex)
+        lg_check_value = 2 ** len(creg)
 
-        label = uuid4().hex
-        for index, cbit in enumerate(creg):
-            if (value >> index) & 1 == 1:
-                # If does not match for cbit_value=1, then branch to label (don't execute the conditional if)
-                self.add_op(Cbz(label), creg=cbit)
+        if check == ClassicalControlCheck.EQ:
+            if (value < 0) or (value >= lg_check_value):
+                return  # Useless if_test condition
+
             else:
-                # If does not match for cbit_value=0, then branch to label
-                self.add_op(Cbnz(label), creg=cbit)
+                for index, cbit in enumerate(creg):
+                    if (value >> index) & 1 == 1:
+                        # If does not match for cbit_value=1, then branch to label (don't execute the conditional if)
+                        self.add_op(Cbz(label=label), creg=cbit)
+                    else:
+                        # If does not match for cbit_value=0, then branch to label
+                        self.add_op(Cbnz(label=label), creg=cbit)
+
+        elif check == ClassicalControlCheck.NEQ:
+            neq_label = Label(uuid4().hex)
+            if (value < 0) or (value >= lg_check_value):
+                # This is an unconditional jump essentially
+                self.add_op(Cbz(label=neq_label), creg=0)
+                self.add_op(Cbnz(label=neq_label), creg=0)
+
+            else:
+                for index, cbit in enumerate(creg):
+                    target_bit_value = (value >> index) & 1
+
+                    if target_bit_value == 1:
+                        # If a mismatch match for cbit_value=1, then branch to neqlabel
+                        self.add_op(Cbz(label=neq_label), creg=cbit)
+                    else:
+                        self.add_op(Cbnz(label=neq_label), creg=cbit)
+
+                # This will only execute if non of the earlier conditional branching executes.
+                # means NEQ is FALSE. We must skip the conditional block.
+
+                # This must be preferably replaced Jump statement (unconditional)
+                self.add_op(Cbz(label=label), creg=0)
+                self.add_op(Cbnz(label=label), creg=0)
+
+            # Successful entry point for the NEQ condition
+            self.add_op(neq_label)
+
+        elif check == ClassicalControlCheck.GT:
+            # Check for redundant conditions
+            if value >= lg_check_value:  # Never true
+                return
+
+            elif value >= 0:  # for value less than 0, condition is always true
+                gt_label = Label(uuid4().hex)
+
+                for index, cbit in enumerate(creg):
+                    target_bit_value = (value >> index) & 1
+
+                    # We break at first point of discontinuity (but to different labels)
+                    if target_bit_value == 1:
+                        self.add_op(Cbz(label=label), creg=cbit)
+                    else:
+                        self.add_op(Cbnz(label=gt_label), creg=cbit)
+
+                # If execution falls through the entire loop without jumping,
+                # it means every single bit matched exactly.
+                # self.add_op(Jump(label=label))
+                self.add_op(Cbz(label=label), creg=0)
+                self.add_op(Cbnz(label=label), creg=0)
+
+                # Entry point for the GT conditional block
+                self.add_op(gt_label)
+
+        elif check == ClassicalControlCheck.LT:
+            # Check for redundant conditions
+            if value <= 0:  # Never true
+                return
+
+            elif (
+                value < lg_check_value
+            ):  # for value larger than 2^m, condition is always true
+                lt_label = Label(uuid4().hex)
+                for index, cbit in enumerate(creg):
+                    target_bit_value = (value >> index) & 1
+
+                    # We break at first point of discontinuity (but to different labels)
+                    if target_bit_value == 1:
+                        self.add_op(Cbz(label=lt_label), creg=cbit)
+                    else:
+                        self.add_op(Cbnz(label=label), creg=cbit)
+
+                # If execution falls through the entire loop without jumping,
+                # it means every single bit matched exactly.
+                # self.add_op(Jump(label=label))
+                self.add_op(Cbz(label=label), creg=0)
+                self.add_op(Cbnz(label=label), creg=0)
+
+                # Entry point for the GT conditional block
+                self.add_op(lt_label)
+
+        else:
+            raise ValueError(f"Invalid check {check}")
 
         try:
             yield
