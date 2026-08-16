@@ -92,6 +92,7 @@ class QubitCircuit:
 
         self.reverse_states = reverse_states
         self._instructions: list[CircuitInstruction] = []
+        self._built_count = -1
 
         if input_states:
             self.input_states = input_states
@@ -149,7 +150,7 @@ class QubitCircuit:
             DeprecationWarning,
             stacklevel=2,
         )
-        return self._instructions
+        return self.instructions
 
     @gates.setter
     def gates(self, value: any) -> None:
@@ -227,6 +228,8 @@ class QubitCircuit:
 
     @property
     def instructions(self) -> list[CircuitInstruction]:
+        if self._built_count != len(self._builder._op_instructions):
+            self.build()
         return self._instructions
 
     def add_state(
@@ -324,6 +327,7 @@ class QubitCircuit:
             # TODO handle non-gate/non-measurement op
 
         self._instructions = tuple(self._instructions)
+        self._built_count = len(self._builder._op_instructions)
 
     def add_measurement(
         self,
@@ -373,14 +377,6 @@ class QubitCircuit:
 
         check_limit("targets", targets, 0, self.num_qubits - 1)
         check_limit("classical_store", classical_store, 0, self.num_cbits - 1)
-
-        self._instructions.append(
-            MeasurementInstruction(
-                operation=measurement,
-                qubits=tuple(targets),
-                cbits=tuple(classical_store),
-            )
-        )
 
         self.add_op(
             op=measurement,
@@ -557,15 +553,6 @@ class QubitCircuit:
         qubits = []
         qubits.extend(controls)
         qubits.extend(targets)
-
-        self._instructions.append(
-            GateInstruction(
-                operation=gate,
-                qubits=tuple(qubits),
-                cbits=tuple(classical_controls),
-                cbits_ctrl_value=classical_control_value,
-            )
-        )
 
         if len(classical_controls) > 0:
             with self._builder.if_test(classical_controls, classical_control_value):
@@ -836,14 +823,17 @@ class QubitCircuit:
                 _resolve_2q_basis(basis_unit, qc_temp, temp_resolved)
                 break
         if not match:
-            qc_temp._instructions = temp_resolved.instructions
+            qc_temp._builder = temp_resolved._builder
 
         if len(basis_1q) != 2:
             return qc_temp
 
         instructions = qc_temp.instructions
-        qc_temp._instructions = []
+        phase = qc_temp.global_phase
         half_pi = np.pi / 2
+
+        qc_temp._builder = BloqBuilder(qc_temp.num_qubits, qc_temp.num_cbits)
+        qc_temp.add_global_phase(phase)
 
         for circ_instruction in instructions:
             gate = circ_instruction.operation
