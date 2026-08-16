@@ -24,10 +24,10 @@ from qutip_qip.circuit.instruction import (
 )
 from qutip_qip.operations.conditional import Cbnz, Cbz, Conditional, Label
 from qutip_qip.operations import (
+    BloqBuilder,
     Gate,
     Measurement,
     Op,
-    OpInstruction,
     expand_operator,
     get_unitary_gate,
 )
@@ -89,7 +89,6 @@ class QubitCircuit:
         N=None,
     ):
         # number of qubits in the register
-        self._num_qubits = num_qubits
         if N is not None:
             warnings.warn(
                 "The 'N' parameter is deprecated. Please use 'num_qubits' instead.",
@@ -98,13 +97,13 @@ class QubitCircuit:
             )
             self._num_qubits = N
 
+        self.dims = dims if dims is not None else [2] * num_qubits
+        self._builder = BloqBuilder(num_qubits, num_cbits, qreg_dim=self.dims)
+
         self.reverse_states = reverse_states
-        self.num_cbits: int = num_cbits
-        self._global_phase: float = 0.0
         self._ops: list[Op] = []
         self._instructions: list[CircuitInstruction] = []
         self._label_counter = 0
-        self.dims = dims if dims is not None else [2] * self.num_qubits
 
         if input_states:
             self.input_states = input_states
@@ -124,7 +123,14 @@ class QubitCircuit:
         """
         Number of qubits in the circuit.
         """
-        return self._num_qubits
+        return self._builder.num_qreg
+
+    @property
+    def num_cbits(self) -> int:
+        """
+        Number of cbits in the circuit.
+        """
+        return self._builder.num_creg
 
     @property
     def N(self) -> int:
@@ -136,18 +142,17 @@ class QubitCircuit:
             DeprecationWarning,
             stacklevel=2,
         )
-        return self._num_qubits
+        return self.num_qubits
 
     def __repr__(self) -> str:
         return ""
 
     @property
     def global_phase(self):
-        return self._global_phase
+        return self._builder.global_phase
 
     def add_global_phase(self, phase: float):
-        self._global_phase += phase
-        self._global_phase %= 2 * np.pi
+        self._builder.add_global_phase(phase)
 
     @property
     def gates(self) -> list[CircuitInstruction]:
@@ -273,151 +278,25 @@ class QubitCircuit:
         value: int,
         check: ClassicalControlCheck = "EQ",
     ):
-        # TODO Validate the arguments
-        if type(cbits) is int:
-            cbits = [cbits]
-
-        # GTE, LTE checks can be implemented as GT, LT conditions itself
-        if check == ClassicalControlCheck.GTE:
-            check = ClassicalControlCheck.GT
-            value -= 1
-
-        elif check == ClassicalControlCheck.LTE:
-            check = ClassicalControlCheck.LT
-            value += 1
-
-        label = Label(f"label_{self._label_counter}")
-        self._label_counter += 1
-
-        if check == ClassicalControlCheck.EQ:
-            if (value < 0) or (value >= 2 ** len(cbits)):
-                return  # Useless if_test condition
-
-            else:
-                for index, cbit in enumerate(cbits):
-                    if (value >> index) & 1 == 1:
-                        # If does not match for cbit_value=1, then branch to label (don't execute the conditional if)
-                        self.add_op(Cbz(label=label), creg=cbit)
-                    else:
-                        # If does not match for cbit_value=0, then branch to label
-                        self.add_op(Cbnz(label=label), creg=cbit)
-
-        elif check == ClassicalControlCheck.NEQ:
-            neq_label = Label(f"label_{self._label_counter}")
-            self._label_counter += 1
-
-            if (value < 0) or (value >= 2 ** len(cbits)):
-                # This is an unconditional jump essentially
-                self.add_op(Cbz(label=neq_label), creg=0)
-                self.add_op(Cbnz(label=neq_label), creg=0)
-
-            else:
-                for index, cbit in enumerate(cbits):
-                    target_bit_value = (value >> index) & 1
-
-                    if target_bit_value == 1:
-                        # If a mismatch match for cbit_value=1, then branch to neqlabel
-                        self.add_op(Cbz(label=neq_label), creg=cbit)
-                    else:
-                        self.add_op(Cbnz(label=neq_label), creg=cbit)
-
-                # This will only execute if non of the earlier conditional branching executes.
-                # means NEQ is FALSE. We must skip the conditional block.
-
-                # This must be preferably replaced Jump statement (unconditional)
-                self.add_op(Cbz(label=label), creg=0)
-                self.add_op(Cbnz(label=label), creg=0)
-
-            # Successful entry point for the NEQ condition
-            self.add_op(neq_label)
-
-        elif check == ClassicalControlCheck.GT:
-            # Check for redundant conditions
-            if value >= 2 ** len(cbits):  # Never true
-                return
-
-            elif value >= 0:  # for value less than 0, condition is always true
-                gt_label = Label(f"label_{self._label_counter}")
-                self._label_counter += 1
-
-                for index, cbit in enumerate(cbits):
-                    target_bit_value = (value >> index) & 1
-
-                    # We break at first point of discontinuity (but to different labels)
-                    if target_bit_value == 1:
-                        self.add_op(Cbz(label=label), creg=cbit)
-                    else:
-                        self.add_op(Cbnz(label=gt_label), creg=cbit)
-
-                # If execution falls through the entire loop without jumping,
-                # it means every single bit matched exactly.
-                # self.add_op(Jump(label=label))
-                self.add_op(Cbz(label=label), creg=0)
-                self.add_op(Cbnz(label=label), creg=0)
-
-                # Entry point for the GT conditional block
-                self.add_op(gt_label)
-
-        elif check == ClassicalControlCheck.LT:
-            # Check for redundant conditions
-            if value <= 0:  # Never true
-                return
-
-            elif value < 2 ** len(
-                cbits
-            ):  # for value larger than 2^m, condition is always true
-                lt_label = Label(f"label_{self._label_counter}")
-                self._label_counter += 1
-
-                for index, cbit in enumerate(cbits):
-                    target_bit_value = (value >> index) & 1
-
-                    # We break at first point of discontinuity (but to different labels)
-                    if target_bit_value == 1:
-                        self.add_op(Cbz(label=lt_label), creg=cbit)
-                    else:
-                        self.add_op(Cbnz(label=label), creg=cbit)
-
-                # If execution falls through the entire loop without jumping,
-                # it means every single bit matched exactly.
-                # self.add_op(Jump(label=label))
-                self.add_op(Cbz(label=label), creg=0)
-                self.add_op(Cbnz(label=label), creg=0)
-
-                # Entry point for the GT conditional block
-                self.add_op(lt_label)
-
-        else:
-            raise ValueError(f"Invalid check {check}")
-
-        # Yields the control back to the code inside the "with" context block
-        try:
-            yield
-        finally:
-            self.add_op(label)
+        self._builder.if_test(cbits, value)
 
     def add_op(
         self: Self,
         op: Op,
         qreg: int | IntSequence = (),
         creg: int | IntSequence = (),
+        style: dict | None = None,
     ):
-        if type(qreg) is int:
-            qreg = [qreg]
-
-        if type(creg) is int:
-            creg = [creg]
-
-        # TODO validate the inputs
-        self._ops.append(OpInstruction(op=op, qreg=tuple(qreg), creg=tuple(creg)))
+        self._builder.add_op(op, qreg, creg, style)
 
     def build(self: Self):
         """
         Converts _ops list to a frozen _instructions tuple.
         """
         self._instructions = []
+        bloq = self._builder.build()
 
-        for op_instruction in self._ops:
+        for op_instruction in bloq.instructions:
             op = op_instruction.op
 
             if isinstance(op, Gate) or (isinstance(op, type) and issubclass(op, Gate)):
@@ -512,12 +391,10 @@ class QubitCircuit:
             )
         )
 
-        self._ops.append(
-            OpInstruction(
-                op=measurement,
-                qreg=tuple(targets),
-                creg=tuple(classical_store),
-            )
+        self._builder.add_op(
+            op=measurement,
+            qreg=tuple(targets),
+            creg=tuple(classical_store),
         )
 
     def add_gate(
@@ -699,17 +576,11 @@ class QubitCircuit:
             )
         )
 
-        instruction = OpInstruction(
-            op=gate,
-            qreg=tuple(qubits),
-            style=style,
-        )
-
         if len(classical_controls) > 0:
-            with self.if_test(classical_controls, classical_control_value):
-                self._ops.append(instruction)
+            with self._builder.if_test(classical_controls, classical_control_value):
+                self.add_op(op=gate, qreg=tuple(qubits), style=style)
         else:
-            self._ops.append(instruction)
+            self.add_op(op=gate, qreg=tuple(qubits), style=style)
 
     def add_circuit(self, qc, start=0):  # TODO Instead of start have a qubit mapping?
         """

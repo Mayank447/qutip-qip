@@ -101,7 +101,7 @@ class BloqBuilder:
         if not (isinstance(dim, Int) and dim > 0):
             raise TypeError(f"dim must be of type int, got {dim}")
 
-        self._aux_qreg_dim.append([dim] * count)
+        self._aux_qreg_dim.extend([dim] * count)
 
     def add_aux_creg(self, count: Int = 1) -> None:
         if not (isinstance(count, Int) and count > 0):
@@ -124,7 +124,7 @@ class BloqBuilder:
     def aux_creg(self) -> tuple[int, ...]:
         return tuple(range(self.num_qcreg, self.num_creg + self.num_aux_creg))
 
-    def add_op(self, op, qreg=(), creg=()) -> None:
+    def add_op(self, op, qreg=(), creg=(), style: dict = None) -> None:
         # Type checking is handled internally within OpInstruction
         # We just check each element of qreg, creg are within the limit
         if isinstance(qreg, Int):
@@ -136,12 +136,12 @@ class BloqBuilder:
         check_limit("creg", creg, 0, self.num_creg + self.num_aux_creg - 1)
 
         self._op_instructions.append(
-            OpInstruction(op=op, qreg=tuple(qreg), creg=tuple(creg))
+            OpInstruction(op=op, qreg=tuple(qreg), creg=tuple(creg), style=style)
         )
 
     @contextmanager
     def if_test(self, creg, value: Int) -> None:
-        if type(creg) is Int:
+        if isinstance(creg, Int):
             creg = [creg]
 
         # TODO test each element in creg is an int
@@ -154,17 +154,26 @@ class BloqBuilder:
         for index, cbit in enumerate(creg):
             if (value >> index) & 1 == 1:
                 # If does not match for cbit_value=1, then branch to label (don't execute the conditional if)
-                self.add_op(Cbz(label), creg=creg)
+                self.add_op(Cbz(label), creg=cbit)
             else:
                 # If does not match for cbit_value=0, then branch to label
-                self.add_op(Cbnz(label), creg=creg)
+                self.add_op(Cbnz(label), creg=cbit)
+
+        try:
+            yield
+        finally:
+            self.add_op(label)
 
     def build(self) -> Bloq:
         return Bloq(
             qreg_dim=self._qreg_dim,
+            aux_qreg_dim=tuple(self._aux_qreg_dim),
             num_creg=self.num_creg,
-            aux_qreg_dim=self._aux_qreg_dim,
-            num_aux_creg=self.num_aux_qreg,
+            num_aux_creg=self.num_aux_creg,
             global_phase=self.global_phase,
             instructions=self.instructions,
         )
+
+
+class BloqRepository:
+    pass
