@@ -623,41 +623,7 @@ class QubitCircuit:
         remove : string
             If first or all gates/measurements are to be removed.
         """
-        if index is not None:
-            if index > len(self.instructions):
-                raise ValueError("Index exceeds number \
-                    of gates + measurements.")
-
-            if end is not None and end <= len(self.instructions):
-                for i in range(end - index):
-                    self._instructions.pop(index + i)
-
-            elif end is not None and end > self.num_qubits:
-                raise ValueError("End target exceeds number \
-                    of gates + measurements.")
-
-            else:
-                self._instructions.pop(index)
-
-        elif name is not None and remove == "first":
-            for circuit_op in self.instructions:
-                if name == circuit_op.operation.name:
-                    self._instructions.remove(circuit_op)
-                    break
-
-        elif name is not None and remove == "last":
-            for i in reversed(range(len(self.instructions))):
-                if name == self.instructions[i].operation.name:
-                    self._instructions.pop(i)
-                    break
-
-        elif name is not None and remove == "all":
-            for i in reversed(range(len(self.instructions))):
-                if name == self.instructions[i].operation.name:
-                    self._instructions.pop(i)
-
-        else:
-            self._instructions.pop()
+        raise AttributeError("remove_gate_or_measurement method has been removed. ")
 
     def reverse_circuit(self):
         """
@@ -668,8 +634,14 @@ class QubitCircuit:
         qubit_circuit : :class:`.QubitCircuit`
             Return :class:`.QubitCircuit` of resolved gates for the
             qubit circuit in the reverse order.
-
         """
+
+        warnings.warn(
+            "QubitCircuit.reverse_circuit has been deprecated and will be future in future versions",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         temp = QubitCircuit(
             self.num_qubits,
             reverse_states=self.reverse_states,
@@ -678,22 +650,13 @@ class QubitCircuit:
             output_states=self.output_states,
         )
 
-        for circ_instruction in reversed(self.instructions):
-            if circ_instruction.is_gate_instruction():
-                temp.add_gate(
-                    gate=circ_instruction.operation,
-                    targets=circ_instruction.targets,
-                    controls=circ_instruction.controls,
-                    classical_controls=circ_instruction.cbits,
-                    classical_control_value=circ_instruction.cbits_ctrl_value,
-                )
-
-            elif circ_instruction.is_measurement_instruction():
-                temp.add_measurement(
-                    measurement=circ_instruction.operation,
-                    targets=circ_instruction.qubits,
-                    classical_store=circ_instruction.cbits[0],
-                )
+        for circ_op in reversed(self.ops):
+            temp.add_op(
+                op=circ_op.op,
+                qreg=circ_op.qreg,
+                creg=circ_op.creg,
+                style=circ_op.style,
+            )
 
         return temp
 

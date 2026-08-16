@@ -449,6 +449,7 @@ class TestQubitCircuit:
         qc.add_state("-", targets=[1])
 
         qc_rev = qc.reverse_circuit()
+        qc_rev.build()
 
         assert qc_rev.instructions[0].operation == gates.H
         assert isinstance(qc_rev.instructions[1].operation, Measurement)
