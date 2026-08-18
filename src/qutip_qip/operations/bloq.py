@@ -122,7 +122,7 @@ class BloqBuilder:
 
     @property
     def aux_creg(self) -> tuple[int, ...]:
-        return tuple(range(self.num_qcreg, self.num_creg + self.num_aux_creg))
+        return tuple(range(self.num_creg, self.num_creg + self.num_aux_creg))
 
     def add_op(self, op, qreg=(), creg=(), style: dict = None) -> None:
         # Type checking is handled internally within OpInstruction
@@ -144,12 +144,18 @@ class BloqBuilder:
         if isinstance(creg, Int):
             creg = [creg]
 
-        # TODO test each element in creg is an int
-        check_limit("creg", creg, 0, self.num_creg + self.num_aux_creg - 1)
+        if check == ClassicalControlCheck.GTE:
+            check = ClassicalControlCheck.GT
+            value -= 1
 
-        label = Label(uuid4().hex)
+        if check == ClassicalControlCheck.LTE:
+            check = ClassicalControlCheck.LT
+            value += 1
+
+        check_limit("creg", creg, 0, self.num_creg + self.num_aux_creg - 1)
         num_bits = len(creg)
         lg_check_value = 2**num_bits
+        label = Label(uuid4().hex)
 
         if check == ClassicalControlCheck.EQ:
             if (value < 0) or (value >= lg_check_value):

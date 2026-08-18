@@ -85,7 +85,7 @@ class QubitCircuit:
                 DeprecationWarning,
                 stacklevel=2,
             )
-            self._num_qubits = N
+            num_qubits = N
 
         self.dims = dims if dims is not None else [2] * num_qubits
         self._builder = BloqBuilder(num_qubits, num_cbits, qreg_dim=self.dims)

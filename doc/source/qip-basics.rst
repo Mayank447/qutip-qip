@@ -50,14 +50,14 @@ A circuit with the various gates and registers available is demonstrated below:
 **Output**:
 
 .. testoutput::
-  :options: +NORMALIZE_WHITESPACE
+  :options: +NORMALIZE_WHITESPACE +ELLIPSIS
 
     (GateInstruction(operation=Gate(SWAP, num_qubits=2), qubits=(0, 1), cbits=(), cbits_ctrl_value=None),
     MeasurementInstruction(operation= Measurement(M), qubits=(1,), cbits=(0,)),
     GateInstruction(operation=Gate(CX, num_qubits=2), qubits=(0, 1), cbits=(), cbits_ctrl_value=None),
-    ConditionalBranchInstruction(operation=Cbz(_name='Cbz', uuid='d80afec8c954475f888d7ded7ac32217', params=(), qreg_dim=(), num_creg=0, unitary=True, self_inverse=False), qubits=(), cbits=(0,)),
+    ConditionalBranchInstruction(operation=Cbz(_name='Cbz', uuid='...', params=(), qreg_dim=(), num_creg=0, unitary=True, self_inverse=False), qubits=(), cbits=(0,)),
     GateInstruction(operation=Gate(X, num_qubits=1), qubits=(0,), cbits=(), cbits_ctrl_value=None),
-    LabelInstruction(operation=Label(_name='5346b421a0ed43b289e56915ae886d4a', uuid='e3e49a682f0b479386bc1387d912b7c9', params=(), qreg_dim=(), num_creg=0, unitary=True, self_inverse=False), qubits=(), cbits=()),
+    LabelInstruction(operation=Label(_name='...', uuid='...', params=(), qreg_dim=(), num_creg=0, unitary=True, self_inverse=False), qubits=(), cbits=()),
     GateInstruction(operation=Gate(SWAP, num_qubits=2), qubits=(0, 1), cbits=(), cbits_ctrl_value=None))
 
 Unitaries
