@@ -271,9 +271,13 @@ class Gate(Op, metaclass=_GateMetaClass):
             f"Or if it must be controlled, it must inherit from 'ControlledGate'."
         )
 
-    @staticmethod
+    @property
     def num_qreg(self) -> int:
         return self.num_qubits
+
+    @property
+    def qreg_dim(self) -> tuple[int, ...]:
+        return (2,) * self.num_qreg
 
     @staticmethod
     @abstractmethod
