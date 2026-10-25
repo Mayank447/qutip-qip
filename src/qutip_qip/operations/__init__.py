@@ -15,7 +15,7 @@ from .controlled import ControlledGate, get_controlled_gate
 from .measurement import Measurement
 from .op import Op, OpInstruction
 from .bloq import Bloq, BloqBuilder
-from .bloq_registry import BloqRepository, register_op
+from .bloq_repository import BloqRepository, register_op
 from .old_gates import (
     rx,
     ry,

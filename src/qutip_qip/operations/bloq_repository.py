@@ -39,7 +39,6 @@ class BloqRepository:
     # registry does not care about them e.g. MultiSWAP(3), MultiSWAP(4) are two different Op values
     # but share the same implementation.
 
-    # TODO: introduce namespace here (only the key changes e.g. std.MultiSWAP)
     _entries: ChainMap[str, BloqImpl] = field(default_factory=ChainMap, init=False)
 
     def __contains__(self, name: str) -> bool:
