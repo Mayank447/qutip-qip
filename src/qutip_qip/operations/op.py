@@ -1,21 +1,10 @@
 import inspect
 from abc import ABC
 from dataclasses import dataclass, field, fields
-from typing import ClassVar, dataclass_transform
+from typing import ClassVar, dataclass_transform, get_origin
 
 from qutip_qip.typing import Int
 from qutip_qip.utils import convert_type_input_to_sequence
-
-_CONFIG = frozenset(
-    {
-        "name",
-        "unitary",
-        "self_inverse",
-        "num_qreg",
-        "num_creg",
-        "qreg_dim",
-    }
-)
 
 
 def _check_config(op) -> None:
@@ -67,6 +56,7 @@ class Op(ABC):
     Base class of every operation. Operations are defined by subclassing.
     """
 
+    # configuration
     name: ClassVar[str]
     num_qreg: ClassVar[int] = 0
     num_creg: ClassVar[int] = 0
@@ -74,8 +64,12 @@ class Op(ABC):
     unitary: ClassVar[bool] = True
     self_inverse: ClassVar[bool] = False
 
+    # derived from configuration
     is_parametric: ClassVar[bool] = False
     is_derived: ClassVar[bool] = False  #
+    config: ClassVar[frozenset[str]] = frozenset(
+        {"name", "num_qreg", "num_creg", "qreg_dim", "unitary", "self_inverse"}
+    )
 
     def __init__(self, *args, **kwargs) -> None:
         raise TypeError(f"{type(self).__name__} class can't be instantiated.")
@@ -89,8 +83,9 @@ class Op(ABC):
 
         # So we keep the annotation for field matching _CONFIG just we can ignore them by making them a ClassVar.
         ann = vars(cls).get("__annotations__", {})
-        for attr in _CONFIG & ann.keys():
-            ann[attr] = ClassVar[ann[attr]]
+        for attr in cls.config & ann.keys():
+            if get_origin(ann[attr]) is not ClassVar:
+                ann[attr] = ClassVar[ann[attr]]
 
         #  If name attribute in subclass is not defined, set it to the name of the subclass
         if "name" not in vars(cls):
@@ -107,7 +102,7 @@ class Op(ABC):
         # Check the config (num_qreg, num_creg etc.) if none of them are parametric
         cls.is_derived = any(
             isinstance(inspect.getattr_static(cls, attr, None), property)
-            for attr in _CONFIG
+            for attr in cls.config
         )
         if not cls.is_derived:
             if "qreg_dim" not in vars(cls):
@@ -117,7 +112,9 @@ class Op(ABC):
     def __post_init__(self) -> None:  # parametric instances only
         if self.is_derived:
             if not self.qreg_dim:
-                object.__setattr__(self, "qreg_dim", (2,) * self.num_qreg)
+                object.__setattr__(
+                    self, "qreg_dim", (2,) * self.num_qreg
+                )  # The dataclass is frozen
             _check_config(self)
 
         self.validate_params()
