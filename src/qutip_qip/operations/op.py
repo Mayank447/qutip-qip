@@ -30,9 +30,6 @@ def _check_config(op) -> None:
             f"{op.name}: qreg_dim={op.qreg_dim} needs {op.num_qreg} entries, each >= 2."
         )
 
-    if not isinstance(op.is_controlled, bool):
-        raise TypeError(f"{op.name}: is_controlled must be a bool.")
-
     if not isinstance(op.unitary, bool):
         raise TypeError("unitary must be of type bool")
 
@@ -96,6 +93,7 @@ class Op(ABC):
             cls.name = cls.__name__
 
         dataclass(frozen=True, repr=False)(cls)
+        cls.is_controlled = "target" in cls.config
         cls.is_parametric = bool(fields(cls))
         if cls.is_parametric:
             cls.params = Op.params

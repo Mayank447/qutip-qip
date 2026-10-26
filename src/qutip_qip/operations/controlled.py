@@ -2,7 +2,7 @@ import inspect
 import math
 from abc import abstractmethod
 from dataclasses import MISSING, fields
-from functools import cache, lru_cache
+from functools import lru_cache
 from typing import ClassVar
 
 import numpy as np
@@ -11,7 +11,6 @@ from scipy.linalg import block_diag
 from qutip import Qobj
 from qutip_qip.operations.gateclass import Gate, class_or_instance_method
 from qutip_qip.operations.op import Op
-from qutip_qip.operations.utils import controlled_gate_unitary
 from qutip_qip.typing import Int
 
 
@@ -21,9 +20,10 @@ class Controlled(Op):
     """
 
     config = Op.config | {"num_ctrl_qreg", "ctrl_dim", "ctrl_value", "target"}
-    is_controlled = True
     num_ctrl_qreg: ClassVar[int] = 1
-    ctrl_value: ClassVar[int | None] = None  # None: all controls in |1>
+    ctrl_value: ClassVar[int | None] = (
+        None  # None: all controls in |1> (|d-1> for control on a qudit)
+    )
     ctrl_dim: ClassVar[tuple[int, ...] | None] = None  # None: qubits
 
     # Abstract class attribute i.e. subclasses need to define
@@ -33,10 +33,10 @@ class Controlled(Op):
     def target(self) -> type[Op]: ...
 
     _derived = {
-        "num_qreg": lambda n, t: n + t.num_qreg,
+        "num_qreg": lambda c, t: c.num_ctrl_qreg + t.num_qreg,
         "qreg_dim": lambda c, t: c.ctrl_dim + t.qreg_dim,
-        "num_creg": lambda n, t: t.num_creg,
-        "self_inverse": lambda n, t: t.self_inverse,
+        "num_creg": lambda c, t: t.num_creg,
+        "self_inverse": lambda c, t: t.self_inverse,
     }
 
     def __init_subclass__(cls) -> None:
@@ -56,7 +56,7 @@ class Controlled(Op):
             if not target.unitary:
                 raise TypeError(f"{cls.__name__}: target must be unitary.")
 
-            if not isinstance(num_ctrl_qreg) or num_ctrl_qreg < 1:
+            if not isinstance(num_ctrl_qreg, Int) or num_ctrl_qreg < 1:
                 raise ValueError(
                     f"{cls.__name__}: num_ctrl_qreg must be an integer >= 1."
                 )
@@ -84,14 +84,10 @@ class Controlled(Op):
                     setattr(
                         cls,
                         attr,
-                        property(
-                            lambda self, rule=rule: rule(
-                                self.num_ctrl_qreg, self.target_op()
-                            )
-                        ),
+                        property(lambda self, rule=rule: rule(self, self.target_op())),
                     )
                 else:
-                    setattr(cls, attr, rule(num_ctrl_qreg, target))
+                    setattr(cls, attr, rule(cls, target))
 
             # The target Op's parameters e.g. theta in RX, become parameter of the Controlled Op as well.
             cls.__annotations__ = {f.name: f.type for f in fields(target)} | vars(
@@ -118,14 +114,14 @@ class Controlled(Op):
 
 class ControlledGate(Controlled, Gate):
     r"""
-    ontrolled Op whose target is a Gate.
+    Controlled Op whose target is a Gate.
 
     Attributes
     ----------
-    target_gate : :class:`.Gate`
+    target : :class:`.Gate`
         The gate to be applied to the target qubits.
 
-    num_ctrl_qubits : int
+    num_ctrl_qreg : int
         The number of qubits acting as controls.
 
     ctrl_value : int
@@ -148,108 +144,13 @@ class ControlledGate(Controlled, Gate):
         if inspect.isabstract(cls):
             return
 
-        # Must have a target_gate
-        target_gate = getattr(cls, "target_gate", None)
-        if target_gate is None or not issubclass(target_gate, Gate):
-            raise TypeError(
-                f"Class '{cls.__name__}' attribute 'target_gate' must be a Gate class, "
-                f"got {type(target_gate)} with value {target_gate}."
-            )
-
-        # Check num_ctrl_qubits is a positive integer
-        num_ctrl_qubits = getattr(cls, "num_ctrl_qubits", None)
-        if (type(num_ctrl_qubits) is not int) or (num_ctrl_qubits < 1):
-            raise TypeError(
-                f"Class '{cls.__name__}' attribute 'num_ctrl_qubits' must be a positive integer, "
-                f"got {type(num_ctrl_qubits)} with value {num_ctrl_qubits}."
-            )
-
-        # Check num_ctrl_qubits < num_qubits
-        if not cls.num_ctrl_qubits < cls.num_qubits:
-            raise ValueError(
-                f"{cls.__name__}: 'num_ctrl_qubits' must be less than the 'num_qubits'"
-            )
-
-        # Check num_ctrl_qubits + target_gate.num_qubits = num_qubits
-        if cls.num_ctrl_qubits + cls.target_gate.num_qubits != cls.num_qubits:
-            raise AttributeError(
-                f"'num_ctrls_qubits' {cls.num_ctrl_qubits} + 'target_gate qubits' {cls.target_gate.num_qubits} must be equal to 'num_qubits' {cls.num_qubits}"
-            )
-        cls._validate_control_value()
-
-        # If the target gate is parametric e.g. RX, so is the overall controlled gate e.g. CRX
-        cls.is_parametric = cls.target_gate.is_parametric
-
-        # Default self_inverse
-        # Don't replace cls.__dict__ with hasattr() that does a MRO search
-        if "self_inverse" not in cls.__dict__:
-            cls.self_inverse = cls.target_gate.self_inverse
-
-        # In the circuit plot, only the target gate is shown.
-        # The control has its own symbol.
-        if "latex_str" not in cls.__dict__:
-            cls.latex_str = cls.target_gate.latex_str
-
-        if not cls.is_controlled:
-            raise ValueError(
-                f"Class '{cls.name}' method 'is_controlled' must be set to True."
-            )
-
-    def __init__(self, *args, **kwargs) -> None:
-        self._target_inst = self.target_gate(*args, **kwargs)
-
-    def __getattr__(self, name: str) -> any:
-        """
-        If an attribute (like 'arg_value') or method (like 'validate_params')
-        isn't found on the ControlledGate, Python falls back to this method.
-        We forward the request to the underlying target gate instance.
-        """
-        return getattr(self._target_inst, name)
-
-    def __setattr__(self, name, value) -> None:
-        """
-        Intercept attribute assignment. If it's our internal storage variable,
-        set it normally on this instance. Otherwise, forward the assignment
-        to the underlying target gate.
-        """
-        if name == "_target_inst":
-            super().__setattr__(name, value)
-        else:
-            setattr(self._target_inst, name, value)
-
-    # Although target_gate is specified as a class attribute, It has been
-    # been made an abstract method to make ControlledGate abstract (required in Metaclass)
-    # This is because Python currently doesn't support abstract class attributes.
-    @property
-    @abstractmethod
-    def target_gate() -> type[Gate]:
-        pass
-
-    @classmethod
-    def _validate_control_value(cls) -> None:
-        """
-        Internal validation for the control value.
-
-        Raises
-        ------
-        TypeError
-            If ctrl_value is not an integer.
-        ValueError
-            If ctrl_value is negative or exceeds the maximum value
-            possible for the number of control qubits ($2^N - 1$).
-        """
-
-        if type(cls.ctrl_value) is not int:
-            raise TypeError(f"Control value must be an int, got {cls.ctrl_value}")
-
-        if cls.ctrl_value < 0 or cls.ctrl_value > (1 << cls.num_ctrl_qubits) - 1:
-            raise ValueError(
-                f"Control value can't be negative and can't be greater than "
-                f"2^num_ctrl_qubits - 1, got {cls.ctrl_value}"
-            )
+        # Target must be a Gate class
+        if not issubclass(cls.target, Gate):
+            raise TypeError(f"{cls.__name__}: target must be a Gate.")
 
     @class_or_instance_method
-    def get_qobj(cls_or_self, dtype: str = "dense") -> Qobj:
+    @lru_cache(maxsize=128)
+    def get_qobj(cls_ins, dtype: str = "dense") -> Qobj:
         """
         Construct the full Qobj representation of the controlled gate.
 
@@ -258,68 +159,73 @@ class ControlledGate(Controlled, Gate):
         qobj : qutip.Qobj
             The unitary matrix representing the controlled operation.
         """
-        if isinstance(cls_or_self, type):
-            target_gate = cls_or_self.target_gate
-        else:
-            target_gate = cls_or_self._target_inst
-
         return controlled_gate_unitary(
-            U=target_gate.get_qobj(dtype),
-            num_controls=cls_or_self.num_ctrl_qubits,
-            control_value=cls_or_self.ctrl_value,
+            U=cls_ins.target_op().get_qobj(dtype),
+            num_ctrls=cls_ins.num_ctrl_qreg,
+            ctrl_value=cls_ins.ctrl_value,
+            ctrl_dim=cls_ins.ctrl_dim,
         )
 
     @class_or_instance_method
-    def inverse(cls_or_self) -> Gate | type[Gate]:
-        if cls_or_self.self_inverse:
-            inverse_gate = cls_or_self
+    def inverse(cls_ins) -> Gate | type[Gate]:
+        if cls_ins.self_inverse:
+            return cls_ins
 
-        # Non-parametrized Gates e.g. S
-        elif isinstance(cls_or_self, type):
-            inverse_gate = get_controlled_gate(
-                cls_or_self.target_gate.inverse(),
-                cls_or_self.num_ctrl_qubits,
-                cls_or_self.ctrl_value,
-            )
+        # We invert the target gate
+        inverse_gate = cls_ins.target_op().inverse()
+        gate_type = (
+            inverse_gate if isinstance(inverse_gate, type) else type(inverse_gate)
+        )
 
-        else:
-            target_inv_inst = cls_or_self._target_inst.inverse()
-            inverse_gate_class = type(target_inv_inst)
-            params = target_inv_inst.arg_value
+        # Inverse of Hadamard is Hadmard, but inverse of T is not T
+        if (
+            gate_type is cls_ins.target
+        ):  # same gate_type, changed params e.g. in case of RX(0.5)
+            return type(cls_ins)(*inverse_gate.params)
 
-            inverse_gate = get_controlled_gate(
-                inverse_gate_class,
-                cls_or_self.num_ctrl_qubits,
-                cls_or_self.ctrl_value,
-            )(*params)
+        cgate = controlled(
+            gate_type, cls_ins.num_ctrl_qreg, cls_ins.ctrl_value, cls_ins.ctrl_dim
+        )
+        return cgate if isinstance(inverse_gate, type) else cgate(*inverse_gate.params)
 
-        return inverse_gate
 
-    @classmethod
-    def __str__(cls) -> str:
-        return f"Gate({cls.name}, target_gate={cls.target_gate}, num_ctrl_qubits={cls.num_ctrl_qubits}, control_value={cls.ctrl_value})"
+@lru_cache(maxsize=128)
+def controlled(
+    target: type[Op],
+    num_ctrl_qreg: int = 1,
+    ctrl_value: int | None = None,
+    ctrl_dim: tuple[int, ...] | None = None,
+    name: str | None = None,
+) -> type[Controlled]:
 
-    def __eq__(self, other) -> bool:
-        # Returns false for CRX(0.5), CRY(0.5)
-        if type(self) is not type(other):
-            return False
+    # What are we controlling a Gate or an Op
+    base_class = ControlledGate if issubclass(target, Gate) else Controlled
 
-        # Returns false for CRX(0.5), CRX(0.6)
-        if self.is_parametric and self._target_inst != other._target_inst:
-            return False
+    # A class body cannot read a parameter if what it assigns has the same name, so we use aliases.
+    _name = name or f"{'C' * num_ctrl_qreg}{target.name}"
+    _target, _num_ctrl_qreg, _ctrl_value, _ctrl_dim = (
+        target,
+        num_ctrl_qreg,
+        ctrl_value,
+        ctrl_dim,
+    )
 
-        return True
+    class _Controlled(base_class):
+        name = _name
+        target = _target
+        num_ctrl_qreg = _num_ctrl_qreg
+        ctrl_value = _ctrl_value
+        ctrl_dim = _ctrl_dim
 
-    def __hash__(self) -> int:
-        if self.is_parametric:
-            return hash((type(self), self._target_inst))
-        return hash(type(self))
+    # Without this every factory-made class is called _Controlled when cls.__name__ is called
+    _Controlled.__name__ = _Controlled.__qualname__ = _name
+    return _Controlled
 
 
 def controlled_gate_unitary(
     U: Qobj,
     num_ctrls: int,
-    control_value: int,
+    ctrl_value: int,
     ctrl_dim: tuple[int, ...] | None = None,
 ) -> Qobj:
     """
@@ -346,34 +252,5 @@ def controlled_gate_unitary(
         ctrl_dim = (2,) * num_ctrls
 
     blocks = [np.eye(U.shape[0]) for _ in range(math.prod(ctrl_dim))]
-    blocks[control_value] = U.full()
+    blocks[ctrl_value] = U.full()
     return Qobj(block_diag(*blocks), dims=[list(ctrl_dim) + U.dims[0]] * 2)
-
-
-def get_controlled_gate(
-    gate: type[Gate],
-    n_ctrl_qubits: int = 1,
-    control_value: int | None = None,
-    gate_name: str | None = None,
-) -> ControlledGate:
-    """
-    Gate Factory for Controlled Gate that takes a gate and num_ctrl_qubits.
-    """
-
-    if control_value is None:
-        control_value = (1 << n_ctrl_qubits) - 1
-
-    if gate_name is None:
-        gate_name = f"{'C' * n_ctrl_qubits}{gate.name}"
-
-    class _CustomControlledGate(ControlledGate):
-        __slots__ = ()
-        name = gate_name
-        latex_str = rf"{gate_name}"
-
-        num_ctrl_qubits = n_ctrl_qubits
-        num_qubits = n_ctrl_qubits + gate.num_qubits
-        ctrl_value = control_value
-        target_gate = gate
-
-    return _CustomControlledGate
