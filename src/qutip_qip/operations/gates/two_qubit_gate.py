@@ -1,6 +1,5 @@
 from abc import abstractmethod
 from functools import cache, lru_cache
-from typing import Final, Type
 
 import numpy as np
 from qutip import Qobj
@@ -21,23 +20,18 @@ from qutip_qip.operations.gates import (
     QASMU,
     PHASE,
 )
-from qutip_qip.operations.namespace import NS_GATE
 
 
 class _TwoQubitGate(Gate):
     """Abstract two-qubit gate."""
 
-    __slots__ = ()
-    namespace = NS_GATE
-    num_qubits: Final[int] = 2
+    num_qubits: int = 2
 
 
 class _TwoQubitParametricGate(AngleParametricGate):
     """Abstract two-qubit Parametric Gate (non-controlled)."""
 
-    __slots__ = ()
-    namespace = NS_GATE
-    num_qubits: Final[int] = 2
+    num_qubits: int = 2
 
     def get_qobj(self, dtype: str = "dense") -> Qobj:
         return self.compute_qobj(self.arg_value, dtype)
@@ -51,12 +45,9 @@ class _TwoQubitParametricGate(AngleParametricGate):
 class _ControlledTwoQubitGate(ControlledGate):
     """Abstract two-qubit Controlled Gate (both parametric and non-parametric)."""
 
-    __slots__ = ()
-    namespace = NS_GATE
-
-    num_qubits: Final[int] = 2
-    num_ctrl_qubits: Final[int] = 1
-    ctrl_value: Final[int] = 1
+    num_qubits: int = 2
+    num_ctrl_qubits: int = 1
+    ctrl_value: int = 1
 
 
 class SWAP(_TwoQubitGate):
@@ -80,11 +71,9 @@ class SWAP(_TwoQubitGate):
      [0. 0. 0. 1.]]
     """
 
-    __slots__ = ()
-
-    self_inverse: Final[bool] = True
-    is_clifford: Final[bool] = True
-    latex_str: Final[str] = r"{\rm SWAP}"
+    self_inverse: bool = True
+    is_clifford: bool = True
+    latex_str: str = r"{\rm SWAP}"
 
     @staticmethod
     @cache
@@ -120,11 +109,9 @@ class ISWAP(_TwoQubitGate):
      [0.+0.j 0.+0.j 0.+0.j 1.+0.j]]
     """
 
-    __slots__ = ()
-
-    self_inverse: Final[bool] = False
-    is_clifford: Final[bool] = True
-    latex_str: Final[str] = r"{i}{\rm SWAP}"
+    self_inverse: bool = False
+    is_clifford: bool = True
+    latex_str: str = r"{i}{\rm SWAP}"
 
     @staticmethod
     @cache
@@ -136,7 +123,7 @@ class ISWAP(_TwoQubitGate):
         )
 
     @staticmethod
-    def inverse() -> Type[Gate]:
+    def inverse() -> type[Gate]:
         return ISWAPdag
 
 
@@ -161,11 +148,9 @@ class ISWAPdag(_TwoQubitGate):
      [ 0.+0.j  0.+0.j  0.+0.j 1.+0.j]]
     """
 
-    __slots__ = ()
-
-    self_inverse: Final[bool] = False
-    is_clifford: Final[bool] = True
-    latex_str: Final[str] = r"{i}{\rm SWAP^\dagger}"
+    self_inverse: bool = False
+    is_clifford: bool = True
+    latex_str: str = r"{i}{\rm SWAP^\dagger}"
 
     @staticmethod
     @cache
@@ -177,7 +162,7 @@ class ISWAPdag(_TwoQubitGate):
         )
 
     @staticmethod
-    def inverse() -> Type[Gate]:
+    def inverse() -> type[Gate]:
         return ISWAP
 
 
@@ -218,10 +203,8 @@ class SQRTSWAP(_TwoQubitGate):
      [0. +0.j  0. +0.j  0. +0.j  1. +0.j ]]
     """
 
-    __slots__ = ()
-
-    self_inverse: Final[bool] = False
-    latex_str: Final[str] = r"\sqrt{\rm SWAP}"
+    self_inverse: bool = False
+    latex_str: str = r"\sqrt{\rm SWAP}"
 
     @staticmethod
     @cache
@@ -240,7 +223,7 @@ class SQRTSWAP(_TwoQubitGate):
         )
 
     @staticmethod
-    def inverse() -> Type[Gate]:
+    def inverse() -> type[Gate]:
         return SQRTSWAPdag
 
 
@@ -260,10 +243,8 @@ class SQRTSWAPdag(_TwoQubitGate):
      [0. +0.j  0. +0.j  0. +0.j  1. +0.j ]]
     """
 
-    __slots__ = ()
-
-    self_inverse: Final[bool] = False
-    latex_str: Final[str] = r"\sqrt{\rm SWAP}^\dagger"
+    self_inverse: bool = False
+    latex_str: str = r"\sqrt{\rm SWAP}^\dagger"
 
     @staticmethod
     @cache
@@ -282,7 +263,7 @@ class SQRTSWAPdag(_TwoQubitGate):
         )
 
     @staticmethod
-    def inverse() -> Type[Gate]:
+    def inverse() -> type[Gate]:
         return SQRTSWAP
 
 
@@ -310,11 +291,9 @@ class SQRTISWAP(_TwoQubitGate):
      [0.     +0.j      0.        +0.j         0.        +0.j         1.     +0.j ]]
     """
 
-    __slots__ = ()
-
-    self_inverse: Final[bool] = False
-    is_clifford: Final[bool] = True
-    latex_str: Final[str] = r"\sqrt{{i}\rm SWAP}"
+    self_inverse: bool = False
+    is_clifford: bool = True
+    latex_str: str = r"\sqrt{{i}\rm SWAP}"
 
     @staticmethod
     @cache
@@ -333,7 +312,7 @@ class SQRTISWAP(_TwoQubitGate):
         )
 
     @staticmethod
-    def inverse() -> Type[Gate]:
+    def inverse() -> type[Gate]:
         return SQRTISWAPdag
 
 
@@ -353,11 +332,9 @@ class SQRTISWAPdag(_TwoQubitGate):
      [ 0.         +0.j           0.        +0.j           0.        +0.j         1.     +0.j     ]]
     """
 
-    __slots__ = ()
-
-    self_inverse: Final[bool] = False
-    is_clifford: Final[bool] = True
-    latex_str: Final[str] = r"\sqrt{{i}\rm SWAP}^\dagger"
+    self_inverse: bool = False
+    is_clifford: bool = True
+    latex_str: str = r"\sqrt{{i}\rm SWAP}^\dagger"
 
     @staticmethod
     @cache
@@ -376,7 +353,7 @@ class SQRTISWAPdag(_TwoQubitGate):
         )
 
     @staticmethod
-    def inverse() -> Type[Gate]:
+    def inverse() -> type[Gate]:
         return SQRTISWAP
 
 
@@ -414,10 +391,8 @@ class BERKELEY(_TwoQubitGate):
      [0.        +0.38268343j 0.        +0.j         0.        +0.j         0.92387953+0.j     ]]
     """
 
-    __slots__ = ()
-
-    self_inverse: Final[bool] = False
-    latex_str: Final[str] = r"{\rm BERKELEY}"
+    self_inverse: bool = False
+    latex_str: str = r"{\rm BERKELEY}"
 
     @staticmethod
     @cache
@@ -434,7 +409,7 @@ class BERKELEY(_TwoQubitGate):
         )
 
     @staticmethod
-    def inverse() -> Type[Gate]:
+    def inverse() -> type[Gate]:
         return BERKELEYdag
 
 
@@ -463,10 +438,8 @@ class BERKELEYdag(_TwoQubitGate):
      [0.        -0.38268343j 0.        +0.j         0.        +0.j         0.92387953+0.j     ]]
     """
 
-    __slots__ = ()
-
-    self_inverse: Final[bool] = False
-    latex_str: Final[str] = r"{\rm BERKELEY^\dagger}"
+    self_inverse: bool = False
+    latex_str: str = r"{\rm BERKELEY^\dagger}"
 
     @staticmethod
     @cache
@@ -483,7 +456,7 @@ class BERKELEYdag(_TwoQubitGate):
         )
 
     @staticmethod
-    def inverse() -> Type[Gate]:
+    def inverse() -> type[Gate]:
         return BERKELEY
 
 
@@ -529,8 +502,8 @@ class SWAPALPHA(_TwoQubitParametricGate):
 
     __slots__ = ("alpha",)
 
-    num_params: Final[int] = 1
-    latex_str: Final[str] = r"{\rm SWAPALPHA}"
+    num_params: int = 1
+    latex_str: str = r"{\rm SWAPALPHA}"
 
     @staticmethod
     @lru_cache(maxsize=128)
@@ -557,7 +530,7 @@ class SWAPALPHA(_TwoQubitParametricGate):
             dtype=dtype,
         )
 
-    def inverse(self) -> Gate | tuple[Type[Gate], tuple[float]]:
+    def inverse(self) -> Gate | tuple[type[Gate], tuple[float]]:
         alpha = self.arg_value[0]
         return SWAPALPHA((-alpha,))
 
@@ -604,8 +577,8 @@ class MS(_TwoQubitParametricGate):
 
     __slots__ = ("theta", "phi")
 
-    num_params: Final[int] = 2
-    latex_str: Final[str] = r"{\rm MS}"
+    num_params: int = 2
+    latex_str: str = r"{\rm MS}"
 
     @staticmethod
     @lru_cache(maxsize=128)
@@ -632,7 +605,7 @@ class MS(_TwoQubitParametricGate):
             dtype=dtype,
         )
 
-    def inverse(self) -> Gate | tuple[Type[Gate], tuple[float, float]]:
+    def inverse(self) -> Gate | tuple[type[Gate], tuple[float, float]]:
         theta, phi = self.arg_value
         return MS((-theta, phi))
 
@@ -679,8 +652,8 @@ class RZX(_TwoQubitParametricGate):
 
     __slots__ = ("theta",)
 
-    num_params: Final[int] = 1
-    latex_str: Final[str] = r"{\rm RZX}"
+    num_params: int = 1
+    latex_str: str = r"{\rm RZX}"
 
     @staticmethod
     @lru_cache(maxsize=128)
@@ -699,7 +672,7 @@ class RZX(_TwoQubitParametricGate):
             dtype=dtype,
         )
 
-    def inverse(self) -> Gate | tuple[Type[Gate], tuple[float]]:
+    def inverse(self) -> Gate | tuple[type[Gate], tuple[float]]:
         theta = self.arg_value[0]
         return RZX((-theta,))
 
@@ -720,12 +693,10 @@ class CX(_ControlledTwoQubitGate):
      [0. 0. 1. 0.]]
     """
 
-    __slots__ = ()
-
-    target_gate: Final[Type[Gate]] = X
-    self_inverse: Final[bool] = True
-    is_clifford: Final[bool] = True
-    latex_str: Final[str] = r"{\rm CNOT}"
+    target_gate: type[Gate] = X
+    self_inverse: bool = True
+    is_clifford: bool = True
+    latex_str: str = r"{\rm CNOT}"
 
     @staticmethod
     @cache
@@ -756,12 +727,10 @@ class CY(_ControlledTwoQubitGate):
      [ 0.+0.j  0.+0.j  0.+1.j   0.+0.j]]
     """
 
-    __slots__ = ()
-
-    target_gate: Final[Type[Gate]] = Y
-    self_inverse: Final[bool] = True
-    is_clifford: Final[bool] = True
-    latex_str: Final[str] = r"{\rm CY}"
+    target_gate: type[Gate] = Y
+    self_inverse: bool = True
+    is_clifford: bool = True
+    latex_str: str = r"{\rm CY}"
 
     @staticmethod
     @cache
@@ -789,12 +758,10 @@ class CZ(_ControlledTwoQubitGate):
      [ 0.  0.  0. -1.]]
     """
 
-    __slots__ = ()
-
-    target_gate: Final[Type[Gate]] = Z
-    self_inverse: Final[bool] = True
-    is_clifford: Final[bool] = True
-    latex_str: Final[str] = r"{\rm CZ}"
+    target_gate: type[Gate] = Z
+    self_inverse: bool = True
+    is_clifford: bool = True
+    latex_str: str = r"{\rm CZ}"
 
     @staticmethod
     @cache
@@ -834,11 +801,9 @@ class CH(_ControlledTwoQubitGate):
      [ 0.          0.          0.70710678 -0.70710678]]
     """
 
-    __slots__ = ()
-
-    target_gate: Final[Type[Gate]] = H
-    self_inverse: Final[bool] = True
-    latex_str: Final[str] = r"{\rm CH}"
+    target_gate: type[Gate] = H
+    self_inverse: bool = True
+    latex_str: str = r"{\rm CH}"
 
     @staticmethod
     @cache
@@ -881,10 +846,8 @@ class CT(_ControlledTwoQubitGate):
      [0. +0.j  0. +0.j  0. +0.j   0.70710678+0.70710678j]]
     """
 
-    __slots__ = ()
-
-    target_gate: Final[Type[Gate]] = T
-    latex_str: Final[str] = r"{\rm CT}"
+    target_gate: type[Gate] = T
+    latex_str: str = r"{\rm CT}"
 
     @staticmethod
     @cache
@@ -901,7 +864,7 @@ class CT(_ControlledTwoQubitGate):
         )
 
     @staticmethod
-    def inverse() -> Type[Gate]:
+    def inverse() -> type[Gate]:
         return CTdag
 
 
@@ -930,10 +893,8 @@ class CTdag(_ControlledTwoQubitGate):
      [0. +0.j  0. +0.j  0. +0.j   0.70710678-0.70710678j]]
     """
 
-    __slots__ = ()
-
-    target_gate: Final[Type[Gate]] = Tdag
-    latex_str: Final[str] = r"{\rm CT^\dagger}"
+    target_gate: type[Gate] = Tdag
+    latex_str: str = r"{\rm CT^\dagger}"
 
     @staticmethod
     @cache
@@ -950,7 +911,7 @@ class CTdag(_ControlledTwoQubitGate):
         )
 
     @staticmethod
-    def inverse() -> Type[Gate]:
+    def inverse() -> type[Gate]:
         return CT
 
 
@@ -979,10 +940,8 @@ class CS(_ControlledTwoQubitGate):
      [0.+0.j  0.+0.j  0.+0.j   0.+1.j]]
     """
 
-    __slots__ = ()
-
-    target_gate: Final[Type[Gate]] = S
-    latex_str: Final[str] = r"{\rm CS}"
+    target_gate: type[Gate] = S
+    latex_str: str = r"{\rm CS}"
 
     @staticmethod
     @cache
@@ -994,7 +953,7 @@ class CS(_ControlledTwoQubitGate):
         )
 
     @staticmethod
-    def inverse() -> Type[Gate]:
+    def inverse() -> type[Gate]:
         return CSdag
 
 
@@ -1023,10 +982,8 @@ class CSdag(_ControlledTwoQubitGate):
      [ 0.+0.j  0.+0.j  0.+0.j   -0.-1.j]]
     """
 
-    __slots__ = ()
-
-    target_gate: Final[Type[Gate]] = Sdag
-    latex_str: Final[str] = r"{\rm CS^\dagger}"
+    target_gate: type[Gate] = Sdag
+    latex_str: str = r"{\rm CS^\dagger}"
 
     @staticmethod
     @cache
@@ -1038,7 +995,7 @@ class CSdag(_ControlledTwoQubitGate):
         )
 
     @staticmethod
-    def inverse() -> Type[Gate]:
+    def inverse() -> type[Gate]:
         return CS
 
 
@@ -1065,11 +1022,9 @@ class CRX(_ControlledTwoQubitGate):
      [0.+0.j 0.+0.j 0.-1.j 0.+0.j]]
     """
 
-    __slots__ = ()
-
-    num_params: Final[int] = 1
-    target_gate: Final[Type[Gate]] = RX
-    latex_str: Final[str] = r"{\rm CRX}"
+    num_params: int = 1
+    target_gate: type[Gate] = RX
+    latex_str: str = r"{\rm CRX}"
 
     @staticmethod
     @lru_cache(maxsize=128)
@@ -1117,11 +1072,9 @@ class CRY(_ControlledTwoQubitGate):
      [ 0.          0.          0.70710678  0.70710678]]
     """
 
-    __slots__ = ()
-
-    num_params: Final[int] = 1
-    target_gate: Final[Type[Gate]] = RY
-    latex_str: Final[str] = r"{\rm CRY}"
+    num_params: int = 1
+    target_gate: type[Gate] = RY
+    latex_str: str = r"{\rm CRY}"
 
     @staticmethod
     @lru_cache(maxsize=128)
@@ -1169,11 +1122,9 @@ class CRZ(_ControlledTwoQubitGate):
      [0.+0.j 0.+0.j 0.+0.j 0.+1.j]]
     """
 
-    __slots__ = ()
-
-    num_params: Final[int] = 1
-    target_gate: Final[Type[Gate]] = RZ
-    latex_str: Final[str] = r"{\rm CRZ}"
+    num_params: int = 1
+    target_gate: type[Gate] = RZ
+    latex_str: str = r"{\rm CRZ}"
 
     @staticmethod
     @lru_cache(maxsize=128)
@@ -1233,11 +1184,9 @@ class CPHASE(_ControlledTwoQubitGate):
      [0.+0.j 0.+0.j 0.+0.j 0.+1.j]]
     """
 
-    __slots__ = ()
-
-    num_params: Final[int] = 1
-    target_gate: Final[Type[Gate]] = PHASE
-    latex_str: Final[str] = r"{\rm CPHASE}"
+    num_params: int = 1
+    target_gate: type[Gate] = PHASE
+    latex_str: str = r"{\rm CPHASE}"
 
     @staticmethod
     @lru_cache(maxsize=128)
@@ -1296,11 +1245,9 @@ class CQASMU(_ControlledTwoQubitGate):
      [ 0. +0.j   0. +0.j   0.5+0.5j -0.5+0.5j]]
     """
 
-    __slots__ = ()
-
-    num_params: Final[int] = 3
-    target_gate: Final[Type[Gate]] = QASMU
-    latex_str: Final[str] = r"{\rm CQASMU}"
+    num_params: int = 3
+    target_gate: type[Gate] = QASMU
+    latex_str: str = r"{\rm CQASMU}"
 
     @staticmethod
     @lru_cache(maxsize=128)

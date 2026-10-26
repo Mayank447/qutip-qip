@@ -6,10 +6,8 @@ from abc import abstractmethod
 from functools import partial
 from typing import ClassVar
 
-import numpy as np
 from qutip import Qobj
 from qutip_qip.operations.op import Op
-from qutip_qip.operations.namespace import NameSpace
 from qutip_qip.typing import Real
 
 

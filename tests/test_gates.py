@@ -10,7 +10,6 @@ from qutip_qip.operations import (
     AngleParametricGate,
     ControlledGate,
     Gate,
-    NameSpace,
     controlled,
     expand_operator,
     get_unitary_gate,
@@ -494,34 +493,6 @@ def test_gate_equality():
 
 
 class TestGateErrors:
-    def test_namespace_errors(self):
-        with pytest.raises(ValueError):
-            NameSpace("bad.namespace")  # namespace cannot contain dots
-
-        ns1 = NameSpace("test_ns")
-        with pytest.raises(ValueError):
-            _ = NameSpace("test_ns")  # Existing namespace
-
-        class TmpGate(Gate):
-            name = "TmpGate"
-            num_qubits = 1
-
-        class TmpGate2(Gate):
-            name = "TmpGate2"
-            num_qubits = 1
-
-        ns1.register("tmp_gate", TmpGate)
-        ns1.register("tmp_gate", TmpGate)
-        with pytest.raises(NameError, match="already exists in namespace"):
-            ns1.register("tmp_gate", TmpGate2)
-
-        assert ns1.get("tmp") is None
-        assert ns1.get("tmp_gate") is TmpGate
-
-        ns1._remove("tmp_gate")
-        with pytest.raises(KeyError):
-            ns1._remove("tmp_gate")
-
     def test_gateclass_errors(self):
         with pytest.raises(TypeError):
 
@@ -738,9 +709,6 @@ class TestGateErrors:
             controlled(gates.X, n_ctrl_qubits=0)  # num_ctrl_qubits > 0
 
     def test_class_attribute_modification(self):
-        with pytest.raises(AttributeError):
-            gates.CX.namespace = NameSpace("temp")
-
         with pytest.raises(AttributeError):
             gates.X.num_qubits = 0
 

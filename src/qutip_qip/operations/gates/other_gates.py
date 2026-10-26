@@ -7,7 +7,6 @@ from qutip import Qobj
 
 from qutip_qip.operations import Gate, ControlledGate, AngleParametricGate
 from qutip_qip.operations.gates import X, SWAP
-from qutip_qip.operations.namespace import NS_GATE
 
 
 class GLOBALPHASE(AngleParametricGate):
@@ -43,13 +42,10 @@ class GLOBALPHASE(AngleParametricGate):
      [ 0. -1.]]
     """
 
-    __slots__ = ()
-    namespace = NS_GATE
-
-    num_qubits: Final[int] = 0
-    num_params: Final[int] = 1
-    self_inverse: Final[bool] = False
-    latex_str: Final[str] = r"{\rm GLOBALPHASE}"
+    num_qubits: int = 0
+    phi: float = 0.0
+    self_inverse: bool = False
+    latex_str: str = r"{\rm GLOBALPHASE}"
 
     def __repr__(self):
         return f"Gate({self.name}, phase {self.arg_value[0]}) -> Qobj:"
@@ -63,8 +59,7 @@ class GLOBALPHASE(AngleParametricGate):
         qobj : qutip.Qobj
             A scalar quantum object with data equal to :math:`e^{i \theta}`.
         """
-        phase = self.arg_value[0]
-        return Qobj(np.exp(1.0j * phase), dtype=dtype)
+        return Qobj(np.exp(1.0j * self.phi), dtype=dtype)
 
     def get_expanded_qobj(self, num_qubits: int, dtype: str = "dense") -> Qobj:
         r"""
@@ -87,17 +82,15 @@ class GLOBALPHASE(AngleParametricGate):
             The expanded unitary matrix representing $e^{i \theta} I$ for the
             $N$-qubit system.
         """
-        phase = self.arg_value[0]
         N = 1 << num_qubits
         return Qobj(
-            np.exp(1.0j * phase) * sp.eye(N, N, dtype=complex, format="csr"),
+            np.exp(1.0j * self.phi) * sp.eye(N, N, dtype=complex, format="csr"),
             dims=[[2] * num_qubits, [2] * num_qubits],
             dtype=dtype,
         )
 
     def inverse(self):
-        theta = self.arg_value[0]
-        return GLOBALPHASE((-theta,))
+        return GLOBALPHASE((-self.phi,))
 
 
 class TOFFOLI(ControlledGate):
@@ -120,16 +113,13 @@ class TOFFOLI(ControlledGate):
      [0. 0. 0. 0. 0. 0. 1. 0.]]
     """
 
-    __slots__ = ()
-    namespace = NS_GATE
+    num_qubits: int = 3
+    num_ctrl_qubits: int = 2
+    ctrl_value: int = 0b11
 
-    num_qubits: Final[int] = 3
-    num_ctrl_qubits: Final[int] = 2
-    ctrl_value: Final[int] = 0b11
-
-    target_gate: Final[Type[Gate]] = X
-    self_inverse: Final[bool] = True
-    latex_str: Final[str] = r"{\rm TOFFOLI}"
+    target_gate: type[Gate] = X
+    self_inverse: bool = True
+    latex_str: str = r"{\rm TOFFOLI}"
 
     @staticmethod
     @cache
@@ -170,16 +160,13 @@ class FREDKIN(ControlledGate):
      [0. 0. 0. 0. 0. 0. 0. 1.]]
     """
 
-    __slots__ = ()
-    namespace = NS_GATE
+    num_qubits: int = 3
+    num_ctrl_qubits: int = 1
+    ctrl_value: int = 1
 
-    num_qubits: Final[int] = 3
-    num_ctrl_qubits: Final[int] = 1
-    ctrl_value: Final[int] = 1
-
-    target_gate: Final[Type[Gate]] = SWAP
-    self_inverse: Final[bool] = True
-    latex_str: Final[str] = r"{\rm FREDKIN}"
+    target_gate: type[Gate] = SWAP
+    self_inverse: bool = True
+    latex_str: str = r"{\rm FREDKIN}"
 
     @staticmethod
     @cache

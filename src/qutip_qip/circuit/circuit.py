@@ -211,7 +211,6 @@ class QubitCircuit:
 
             class _OldUserParametricGate(AngleParametricGate):
                 __slots__ = ()
-                namespace = None
                 name = gate_name
                 num_qubits = _num_qubits
                 num_params = _num_params
