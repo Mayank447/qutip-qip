@@ -1,36 +1,109 @@
 import inspect
-import warnings
 from abc import abstractmethod
-from functools import partial
-from typing import Final, Type
+from dataclasses import MISSING, fields
+from functools import cache, lru_cache
+from typing import ClassVar
 
 from qutip import Qobj
-from qutip_qip.operations import (
-    Gate,
-    NameSpace,
-    controlled_gate_unitary,
-)
+from qutip_qip.operations.gateclass import Gate, class_or_instance_method
+from qutip_qip.operations.op import Op
+from qutip_qip.operations.utils import controlled_gate_unitary
+from qutip_qip.typing import Int
 
 
-class class_or_instance_method:
+class Controlled(Op):
     """
-    Binds a method to the instance if called on an instance,
-    or to the class if called on the class.
+    Abstract class for defining a Controlled Op.
     """
 
-    def __init__(self, func):
-        self.func = func
+    config = Op.config | {"num_ctrl_qreg", "ctrl_value", "target"}
+    is_controlled = True
+    num_ctrl_qreg: ClassVar[int] = 1
+    ctrl_value: ClassVar[int | None] = None  # None: all controls in |1>
 
-    def __get__(self, instance, owner):
-        # Called on the class (e.g., CX.get_qobj())
-        if instance is None:
-            return partial(self.func, owner)
+    # Abstract class attribute i.e. subclasses need to define
+    # target = RX   for example
+    @property
+    @abstractmethod
+    def target(self) -> type[Op]: ...
 
-        # Called on the instance (e.g., CRX(0.5).get_qobj())
-        return partial(self.func, instance)
+    _derived = {
+        "num_qreg": lambda n, t: n + t.num_qreg,
+        "qreg_dim": lambda n, t: (2,) * n + t.qreg_dim,
+        "num_creg": lambda n, t: t.num_creg,
+        "self_inverse": lambda n, t: t.self_inverse,
+    }
+
+    def __init_subclass__(cls) -> None:
+        if not inspect.isabstract(cls):
+            target, num_ctrl_qreg = cls.target, cls.num_ctrl_qreg
+            if not (
+                isinstance(
+                    target, type
+                )  # It must not be an instance e.g. RX(0.5), rather the class itself
+                and issubclass(target, Op)
+                and not inspect.isabstract(target)
+            ):
+                raise TypeError(
+                    f"{cls.__name__}: target must be a concrete Op, got {target!r}."
+                )
+
+            if not target.unitary:
+                raise TypeError(f"{cls.__name__}: target must be unitary.")
+
+            if not isinstance(num_ctrl_qreg) or num_ctrl_qreg < 1:
+                raise ValueError(
+                    f"{cls.__name__}: num_ctrl_qreg must be an integer >= 1."
+                )
+
+            if cls.ctrl_value is None:
+                cls.ctrl_value = (1 << num_ctrl_qreg) - 1
+
+            if not isinstance(cls.ctrl_value, Int) or not 0 <= cls.ctrl_value < (
+                1 << num_ctrl_qreg
+            ):
+                raise ValueError(
+                    f"{cls.__name__}: ctrl_value must be an integral in [0, 2**num_ctrl_qreg)."
+                )
+
+            for attr, rule in cls._derived.items():
+                if target.is_derived:  # e.g. MCX(n)
+                    setattr(
+                        cls,
+                        attr,
+                        property(
+                            lambda self, rule=rule: rule(
+                                self.num_ctrl_qreg, self.target_op()
+                            )
+                        ),
+                    )
+                else:
+                    setattr(cls, attr, rule(num_ctrl_qreg, target))
+
+            # The target Op's parameters e.g. theta in RX, become parameter of the Controlled Op as well.
+            cls.__annotations__ = {f.name: f.type for f in fields(target)} | vars(
+                cls
+            ).get("__annotations__", {})
+            for f in fields(target):
+                if f.default is not MISSING:
+                    setattr(cls, f.name, f.default)
+
+        super().__init_subclass__()
+
+    def validate_params(self) -> None:
+        # Run the validate_params method by buidling the target
+        # For non-parametric target Op like X, validate_params is just pass be default, so it passes
+        # For Parametric target Op (say RX), when we call CRX(theta), RX(theta) gets constructed which validates the params
+        self.target_op()
+
+    @class_or_instance_method
+    def target_op(cls_ins) -> Op | type[Op]:
+        if isinstance(cls_ins, type):
+            return cls_ins.target
+        return cls_ins.target(*cls_ins.params)
 
 
-class ControlledGate(Gate):
+class ControlledGate(Controlled, Gate):
     r"""
     Abstract base class for controlled quantum gates.
 
@@ -55,11 +128,7 @@ class ControlledGate(Gate):
     """
 
     __slots__ = ("_target_inst",)
-    is_controlled: Final[bool] = True
-
-    num_ctrl_qubits: int
-    ctrl_value: int
-    target_gate: Type[Gate]
+    target_gate: type[Gate]
 
     def __init_subclass__(cls, **kwargs) -> None:
         """
@@ -144,7 +213,7 @@ class ControlledGate(Gate):
     # This is because Python currently doesn't support abstract class attributes.
     @property
     @abstractmethod
-    def target_gate() -> Type[Gate]:
+    def target_gate() -> type[Gate]:
         pass
 
     @classmethod
@@ -192,7 +261,7 @@ class ControlledGate(Gate):
         )
 
     @class_or_instance_method
-    def inverse(cls_or_self) -> Gate | Type[Gate]:
+    def inverse(cls_or_self) -> Gate | type[Gate]:
         if cls_or_self.self_inverse:
             inverse_gate = cls_or_self
 
@@ -239,11 +308,10 @@ class ControlledGate(Gate):
 
 
 def get_controlled_gate(
-    gate: Type[Gate],
+    gate: type[Gate],
     n_ctrl_qubits: int = 1,
     control_value: int | None = None,
     gate_name: str | None = None,
-    gate_namespace: NameSpace | None = None,
 ) -> ControlledGate:
     """
     Gate Factory for Controlled Gate that takes a gate and num_ctrl_qubits.
@@ -255,18 +323,8 @@ def get_controlled_gate(
     if gate_name is None:
         gate_name = f"{'C' * n_ctrl_qubits}{gate.name}"
 
-    if gate_namespace is not None:
-        found_gate = gate_namespace.get((gate.name, n_ctrl_qubits, control_value))
-        if found_gate is not None:
-            warnings.warn(
-                f"Found the same existing Controlled Gate {found_gate.name}",
-                UserWarning,
-            )
-            return found_gate
-
     class _CustomControlledGate(ControlledGate):
         __slots__ = ()
-        namespace = gate_namespace
         name = gate_name
         latex_str = rf"{gate_name}"
 
