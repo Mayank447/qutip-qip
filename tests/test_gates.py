@@ -10,7 +10,6 @@ from qutip_qip.operations import (
     AngleParametricGate,
     ControlledGate,
     Gate,
-    ParametricGate,
     NameSpace,
     get_controlled_gate,
     expand_operator,
@@ -606,31 +605,6 @@ class TestGateErrors:
 
             class NotGoodGate4(GoodGate):
                 is_parametric = 1  # must return a bool
-
-    def test_parametric_gate_errors(self):
-        with pytest.raises(TypeError):
-
-            class BadParamGate(ParametricGate):
-                num_params = -1
-
-                def get_qobj(self, dtype):
-                    pass
-
-                @staticmethod
-                def validate_params(args):
-                    pass
-
-        with pytest.raises(TypeError):
-
-            class BadParamGate2(ParametricGate):
-                num_params = 1.5
-
-                def get_qobj(self, dtype):
-                    pass
-
-                @staticmethod
-                def validate_params(args):
-                    pass
 
         class GoodParamGate(AngleParametricGate):
             num_qubits = 1

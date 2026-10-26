@@ -9,8 +9,7 @@ from .utils import (
     gate_sequence_product,
     controlled_gate_unitary,
 )
-from .gateclass import Gate, get_unitary_gate
-from .parametric import ParametricGate, AngleParametricGate
+from .gateclass import Gate, AngleParametricGate, get_unitary_gate
 from .controlled import ControlledGate, get_controlled_gate
 from .measurement import Measurement
 from .op import Op, OpInstruction
@@ -54,7 +53,6 @@ from .old_gates import (
 __all__ = [
     "NameSpace",
     "Gate",
-    "ParametricGate",
     "ControlledGate",
     "get_unitary_gate",
     "get_controlled_gate",
