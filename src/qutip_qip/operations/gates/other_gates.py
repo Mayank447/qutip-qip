@@ -1,5 +1,5 @@
+import warnings
 from functools import cache
-from typing import Final, Type
 
 import scipy.sparse as sp
 import numpy as np
@@ -42,13 +42,18 @@ class GLOBALPHASE(AngleParametricGate):
      [ 0. -1.]]
     """
 
-    num_qubits: int = 0
-    phi: float = 0.0
-    self_inverse: bool = False
+    num_qreg: int = 0
+    phi: float
     latex_str: str = r"{\rm GLOBALPHASE}"
 
-    def __repr__(self):
-        return f"Gate({self.name}, phase {self.arg_value[0]}) -> Qobj:"
+    def __post_init__(self) -> None:
+        warnings.warn(
+            "GLOBALPHASE is deprecated and will be removed in a future version. "
+            "Use QubitCircuit.add_global_phase(phase) instead.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        super().__post_init__()
 
     def get_qobj(self, dtype: str = "dense") -> Qobj:
         r"""
@@ -90,7 +95,7 @@ class GLOBALPHASE(AngleParametricGate):
         )
 
     def inverse(self):
-        return GLOBALPHASE((-self.phi,))
+        return GLOBALPHASE(-self.phi)
 
 
 class TOFFOLI(ControlledGate):
@@ -113,12 +118,10 @@ class TOFFOLI(ControlledGate):
      [0. 0. 0. 0. 0. 0. 1. 0.]]
     """
 
-    num_qubits: int = 3
-    num_ctrl_qubits: int = 2
+    num_ctrl_qreg: int = 2
     ctrl_value: int = 0b11
 
-    target_gate: type[Gate] = X
-    self_inverse: bool = True
+    target: type[Gate] = X
     latex_str: str = r"{\rm TOFFOLI}"
 
     @staticmethod
@@ -160,12 +163,10 @@ class FREDKIN(ControlledGate):
      [0. 0. 0. 0. 0. 0. 0. 1.]]
     """
 
-    num_qubits: int = 3
-    num_ctrl_qubits: int = 1
+    num_ctrl_qreg: int = 1
     ctrl_value: int = 1
 
-    target_gate: type[Gate] = SWAP
-    self_inverse: bool = True
+    target: type[Gate] = SWAP
     latex_str: str = r"{\rm FREDKIN}"
 
     @staticmethod
