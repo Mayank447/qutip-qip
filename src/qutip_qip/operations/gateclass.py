@@ -55,11 +55,9 @@ class Gate(Op):
         Defaults to the class name if not provided.
     """
 
-    config = Op.config | {"is_clifford", "is_controlled", "latex_str", "namespace"}
+    config = Op.config | {"is_clifford", "latex_str"}
     is_clifford: ClassVar[bool] = False
-    is_controlled: ClassVar[bool] = False
     latex_str: ClassVar[str]
-    namespace: ClassVar[NameSpace | None] = None
 
     def __init_subclass__(cls) -> None:
         """
@@ -79,9 +77,6 @@ class Gate(Op):
         if not isinstance(cls.is_clifford, bool):
             raise TypeError(f"{cls.name}: is_clifford must be a bool.")
 
-        if not isinstance(cls.is_controlled, bool):
-            raise TypeError(f"{cls.name}: is_controlled must be a bool.")
-
         # Can't define inverse() method if self_inverse is set True
         if cls.self_inverse and "inverse" in vars(cls):
             raise TypeError(
@@ -98,9 +93,6 @@ class Gate(Op):
 
         if "latex_str" not in vars(cls):
             cls.latex_str = cls.name
-
-        if cls.namespace is not None:
-            cls.namespace.register(cls.name, cls)
 
         cls.num_qubits = cls.num_qreg  # TODO: delete this
 

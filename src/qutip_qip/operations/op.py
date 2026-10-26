@@ -30,6 +30,9 @@ def _check_config(op) -> None:
             f"{op.name}: qreg_dim={op.qreg_dim} needs {op.num_qreg} entries, each >= 2."
         )
 
+    if not isinstance(op.is_controlled, bool):
+        raise TypeError(f"{op.name}: is_controlled must be a bool.")
+
     if not isinstance(op.unitary, bool):
         raise TypeError("unitary must be of type bool")
 
@@ -65,6 +68,7 @@ class Op(ABC):
     self_inverse: ClassVar[bool] = False
 
     # derived from configuration
+    is_controlled: ClassVar[bool] = False
     is_parametric: ClassVar[bool] = False
     is_derived: ClassVar[bool] = False  #
     config: ClassVar[frozenset[str]] = frozenset(
