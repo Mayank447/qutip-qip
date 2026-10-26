@@ -1,8 +1,12 @@
 import inspect
+import math
 from abc import abstractmethod
 from dataclasses import MISSING, fields
 from functools import cache, lru_cache
 from typing import ClassVar
+
+import numpy as np
+from scipy.linalg import block_diag
 
 from qutip import Qobj
 from qutip_qip.operations.gateclass import Gate, class_or_instance_method
@@ -16,10 +20,11 @@ class Controlled(Op):
     Abstract class for defining a Controlled Op.
     """
 
-    config = Op.config | {"num_ctrl_qreg", "ctrl_value", "target"}
+    config = Op.config | {"num_ctrl_qreg", "ctrl_dim", "ctrl_value", "target"}
     is_controlled = True
     num_ctrl_qreg: ClassVar[int] = 1
     ctrl_value: ClassVar[int | None] = None  # None: all controls in |1>
+    ctrl_dim: ClassVar[tuple[int, ...] | None] = None  # None: qubits
 
     # Abstract class attribute i.e. subclasses need to define
     # target = RX   for example
@@ -29,7 +34,7 @@ class Controlled(Op):
 
     _derived = {
         "num_qreg": lambda n, t: n + t.num_qreg,
-        "qreg_dim": lambda n, t: (2,) * n + t.qreg_dim,
+        "qreg_dim": lambda c, t: c.ctrl_dim + t.qreg_dim,
         "num_creg": lambda n, t: t.num_creg,
         "self_inverse": lambda n, t: t.self_inverse,
     }
@@ -56,15 +61,23 @@ class Controlled(Op):
                     f"{cls.__name__}: num_ctrl_qreg must be an integer >= 1."
                 )
 
-            if cls.ctrl_value is None:
-                cls.ctrl_value = (1 << num_ctrl_qreg) - 1
+            # Validating creg_dim, ctrl_value
+            if cls.ctrl_dim is None:
+                cls.ctrl_dim = (2,) * num_ctrl_qreg
 
-            if not isinstance(cls.ctrl_value, Int) or not 0 <= cls.ctrl_value < (
-                1 << num_ctrl_qreg
+            if len(cls.ctrl_dim) != num_ctrl_qreg or any(
+                not isinstance(d, Int) or d < 2 for d in cls.ctrl_dim
             ):
                 raise ValueError(
-                    f"{cls.__name__}: ctrl_value must be an integral in [0, 2**num_ctrl_qreg)."
+                    f"{cls.__name__}: ctrl_dim={cls.ctrl_dim} needs {num_ctrl_qreg} entries, each >= 2."
                 )
+
+            size = math.prod(cls.ctrl_dim)
+            if cls.ctrl_value is None:
+                cls.ctrl_value = size - 1
+
+            if not isinstance(cls.ctrl_value, Int) or not 0 <= cls.ctrl_value < size:
+                raise ValueError(f"{cls.__name__}: ctrl_value must be in [0, {size}).")
 
             for attr, rule in cls._derived.items():
                 if target.is_derived:  # e.g. MCX(n)
@@ -105,10 +118,7 @@ class Controlled(Op):
 
 class ControlledGate(Controlled, Gate):
     r"""
-    Abstract base class for controlled quantum gates.
-
-    A controlled gate applies a target unitary operation only when the control
-    qubits are in a specific state.
+    ontrolled Op whose target is a Gate.
 
     Attributes
     ----------
@@ -127,15 +137,14 @@ class ControlledGate(Controlled, Gate):
         If the gate should execute when two control qubits are $|10\rangle$ (binary 10), set ``ctrl_value=0b10``.
     """
 
-    __slots__ = ("_target_inst",)
-    target_gate: type[Gate]
+    config = Controlled.config | Gate.config
 
-    def __init_subclass__(cls, **kwargs) -> None:
+    def __init_subclass__(cls) -> None:
         """
         Validates the subclass definition.
         """
 
-        super().__init_subclass__(**kwargs)
+        super().__init_subclass__()
         if inspect.isabstract(cls):
             return
 
@@ -305,6 +314,40 @@ class ControlledGate(Controlled, Gate):
         if self.is_parametric:
             return hash((type(self), self._target_inst))
         return hash(type(self))
+
+
+def controlled_gate_unitary(
+    U: Qobj,
+    num_ctrls: int,
+    control_value: int,
+    ctrl_dim: tuple[int, ...] | None = None,
+) -> Qobj:
+    """
+    Create an N-qubit controlled gate from a single-qubit gate U with the given
+    control and target qubits.
+
+    Parameters
+    ----------
+    U : :class:`qutip.Qobj`
+        An arbitrary unitary gate.
+    num_ctrls : int
+        The total number of control qubits.
+    control_value : int
+        The decimal value of the controlled qubits that activates the gate U.
+    ctrl_dim: tuple[int, ...]
+        For generalized qudit targets
+
+    Returns
+    -------
+    result : qobj
+        Quantum object representing the controlled-U gate.
+    """
+    if ctrl_dim is None:
+        ctrl_dim = (2,) * num_ctrls
+
+    blocks = [np.eye(U.shape[0]) for _ in range(math.prod(ctrl_dim))]
+    blocks[control_value] = U.full()
+    return Qobj(block_diag(*blocks), dims=[list(ctrl_dim) + U.dims[0]] * 2)
 
 
 def get_controlled_gate(

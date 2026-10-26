@@ -7,10 +7,9 @@ from .utils import (
     hadamard_transform,
     expand_operator,
     gate_sequence_product,
-    controlled_gate_unitary,
 )
 from .gateclass import Gate, AngleParametricGate, get_unitary_gate
-from .controlled import ControlledGate, get_controlled_gate
+from .controlled import ControlledGate, get_controlled_gate, controlled_gate_unitary
 from .measurement import Measurement
 from .op import Op, OpInstruction
 from .bloq import Bloq, BloqBuilder
