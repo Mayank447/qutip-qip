@@ -71,6 +71,9 @@ class Gate(Op):
         # Skip the below check for an abstract class
         super().__init_subclass__()
 
+        if "latex_str" not in vars(cls):
+            cls.latex_str = cls.name
+
         if "dtype" not in inspect.signature(cls.get_qobj).parameters:
             raise TypeError(f"{cls.name}.get_qobj must accept a dtype parameter.")
 
@@ -90,9 +93,6 @@ class Gate(Op):
         # This allows us to handle those cases as well.
         if inspect.isabstract(cls) or cls.is_derived:
             return
-
-        if "latex_str" not in vars(cls):
-            cls.latex_str = cls.name
 
         cls.num_qubits = cls.num_qreg  # TODO: delete this
 
@@ -144,28 +144,24 @@ class AngleParametricGate(Gate):
                 raise TypeError(f"{self.name}: parameters must be real, got {v!r}.")
 
 
-def get_unitary_gate(
-    gate_name: str, U: Qobj, gate_namespace: NameSpace | None = None
-) -> type[Gate]:
+def get_unitary_gate(name: str, U: Qobj) -> type[Gate]:
     """
     Gate Factory for Custom Gate that wraps an arbitrary unitary matrix U.
     """
 
-    # Check whether U is unitary
-    n = np.log2(U.shape[0])
-    if n != np.log2(U.shape[1]):
-        raise ValueError("The U must be square matrix.")
+    _name = name
+    if not U.isoper or U.dims[0] != U.dims[1]:
+        raise ValueError(
+            "U must be a square operator with equal input and output dims."
+        )
 
-    if n % 1 != 0:
-        raise ValueError("The unitary U must have dim NxN, where N=2^n")
-
-    if not np.allclose((U * U.dag()).full(), np.eye(U.shape[0])):
-        raise ValueError("U must be a unitary matrix")
+    if not U.isunitary:
+        raise ValueError("U must be unitary.")
 
     class _CustomGate(Gate):
-        namespace = gate_namespace
-        name = gate_name
-        num_qreg = int(n)
+        name = _name
+        num_qreg = len(U.dims[0])
+        qreg_dim = tuple(U.dims[0])
         self_inverse = U == U.dag()
 
         @staticmethod
