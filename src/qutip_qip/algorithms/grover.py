@@ -1,6 +1,6 @@
 import numpy as np
 from qutip_qip.circuit import QubitCircuit
-from qutip_qip.operations import Gate, get_controlled_gate
+from qutip_qip.operations import Gate, controlled
 from qutip_qip.operations.gates import H, X, Z, CZ
 from qutip_qip.typing import IntSequence, SequenceLike
 
@@ -66,7 +66,7 @@ def grover_oracle(
             if len(ctrls) == 1:
                 qc.add_gate(CZ, controls=ctrls, targets=tgt)
             else:
-                mcz = get_controlled_gate(Z, len(ctrls), ctrl_val)
+                mcz = controlled(Z, len(ctrls), ctrl_val)
                 qc.add_gate(mcz, controls=ctrls, targets=tgt)
 
         # Uncompute the flipped zero bits for all qubit counts.
@@ -220,7 +220,7 @@ def grover(
             if len(ctrls) == 1:
                 qc.add_gate(CZ, controls=ctrls, targets=tgt)
             else:
-                mcz = get_controlled_gate(Z, len(ctrls), ctrl_val)
+                mcz = controlled(Z, len(ctrls), ctrl_val)
                 qc.add_gate(mcz, controls=ctrls, targets=tgt)
 
         for q in search_qubits:

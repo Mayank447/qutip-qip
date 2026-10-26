@@ -9,7 +9,7 @@ from .utils import (
     gate_sequence_product,
 )
 from .gateclass import Gate, AngleParametricGate, get_unitary_gate
-from .controlled import ControlledGate, get_controlled_gate, controlled_gate_unitary
+from .controlled import ControlledGate, controlled, controlled_gate_unitary
 from .measurement import Measurement
 from .op import Op, OpInstruction
 from .bloq import Bloq, BloqBuilder
@@ -54,7 +54,7 @@ __all__ = [
     "Gate",
     "ControlledGate",
     "get_unitary_gate",
-    "get_controlled_gate",
+    "controlled",
     "AngleParametricGate",
     "Measurement",
     "Op",

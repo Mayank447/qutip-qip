@@ -11,7 +11,7 @@ from qutip_qip.operations import (
     ControlledGate,
     Gate,
     NameSpace,
-    get_controlled_gate,
+    controlled,
     expand_operator,
     get_unitary_gate,
     hadamard_transform,
@@ -262,7 +262,7 @@ class TestGateExpansion:
             assert _infidelity(test, expected) < 1e-12
 
     random_gate = get_unitary_gate("random", qutip.rand_unitary([2] * 1))
-    RandomThreeQubitGate = get_controlled_gate(random_gate, 2)
+    RandomThreeQubitGate = controlled(random_gate, 2)
 
     @pytest.mark.parametrize(
         ["gate", "n_controls"],
@@ -462,8 +462,8 @@ CONTROLLED_GATE = [
     gates.CQASMU(arg_value=(0.9, 0.22, 0.15)),
     gates.TOFFOLI,
     gates.FREDKIN,
-    get_controlled_gate(U1, 1, 1),
-    get_controlled_gate(U2, 1, 1)(0.88),
+    controlled(U1, 1, 1),
+    controlled(U2, 1, 1)(0.88),
 ]
 
 
@@ -732,10 +732,10 @@ class TestGateErrors:
 
         # Control_value > 2^n -1
         with pytest.raises(ValueError):
-            get_controlled_gate(gates.X, n_ctrl_qubits=1, control_value=2)
+            controlled(gates.X, n_ctrl_qubits=1, control_value=2)
 
         with pytest.raises(TypeError):
-            get_controlled_gate(gates.X, n_ctrl_qubits=0)  # num_ctrl_qubits > 0
+            controlled(gates.X, n_ctrl_qubits=0)  # num_ctrl_qubits > 0
 
     def test_class_attribute_modification(self):
         with pytest.raises(AttributeError):
