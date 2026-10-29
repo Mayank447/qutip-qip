@@ -1,7 +1,7 @@
 import copyreg
 import inspect
 from abc import ABC, ABCMeta
-from dataclasses import dataclass, field, fields, MISSING
+from dataclasses import dataclass, field, fields
 from functools import partial, wraps
 from typing import ClassVar, dataclass_transform, get_origin
 
@@ -42,12 +42,18 @@ def _check_config(op) -> None:
 class OpMeta(ABCMeta):
     """_key if present is a custom key to be used to hash"""
 
+    # To avoid checking the base class for hierarchy.
+    # Otherwise having a intermediatery class e.g. _TwoQubitControlledGate for CX
+    # makes CX == controlled(X) check fail.
+    # For further details, read about ABCMeta cache
+    __instancecheck__ = type.__instancecheck__
+    __subclasscheck__ = type.__subclasscheck__
+
     def __eq__(cls, other):
         key = vars(cls).get("_key")
         return cls is other or (
             key is not None
             and isinstance(other, OpMeta)
-            and cls.__bases__ == other.__bases__
             and key == vars(other).get("_key")
         )
 
@@ -112,7 +118,7 @@ class Op(ABC, metaclass=OpMeta):
         if "name" not in vars(cls):
             cls.name = cls.__name__
 
-        dataclass(frozen=True, repr=False)(cls)
+        dataclass(frozen=True, repr=False, eq=False)(cls)
 
         cls.is_controlled = "target" in cls.config
         cls.is_parametric = bool(fields(cls))
@@ -157,7 +163,7 @@ class Op(ABC, metaclass=OpMeta):
     def __eq__(self, other) -> bool:
         return (
             isinstance(other, Op)
-            and type(self) is type(other)
+            and type(self) == type(other)  # noqa: E721
             and self.params == other.params
         )
 
