@@ -10,7 +10,7 @@ from scipy.linalg import block_diag
 
 from qutip import Qobj
 from qutip_qip.operations.gateclass import Gate, class_or_instance_method
-from qutip_qip.operations.op import Op
+from qutip_qip.operations.op import Op, op_factory
 from qutip_qip.typing import Int
 
 
@@ -206,6 +206,7 @@ class ControlledGate(Controlled, Gate):
         return cgate if isinstance(inverse_gate, type) else cgate(*inverse_gate.params)
 
 
+@op_factory
 @lru_cache(maxsize=128)
 def controlled(
     target: type[Op],

@@ -1,6 +1,8 @@
+import copyreg
 import inspect
 from abc import ABC, ABCMeta
 from dataclasses import dataclass, field, fields, MISSING
+from functools import partial, wraps
 from typing import ClassVar, dataclass_transform, get_origin
 
 from qutip_qip.typing import Int
@@ -38,6 +40,7 @@ def _check_config(op) -> None:
 
 
 class OpMeta(ABCMeta):
+    """_key if present is a custom key to be used to hash"""
 
     def __eq__(cls, other):
         key = vars(cls).get("_key")
@@ -200,3 +203,19 @@ class OpInstruction:
     def __repr__(self) -> str:
         label = self.op.name if isinstance(self.op, type) else repr(self.op)
         return f"OpInstruction({label}, qreg={self.qreg}, creg={self.creg})"
+
+
+# In future if we want to pickle Ops or use the multiprocessing package
+# the Ops created via functions like get_unitary_gate, controlled won't
+# reduce properly due to the import path issue. That's why we have to define op_factory.
+copyreg.pickle(OpMeta, lambda cls: vars(cls).get("_factory") or cls.__qualname__)
+
+
+def op_factory(build):
+    @wraps(build)
+    def factory(*args, **kwargs):
+        cls = build(*args, **kwargs)
+        cls._factory = (partial(factory, *args, **kwargs), ())
+        return cls
+
+    return factory

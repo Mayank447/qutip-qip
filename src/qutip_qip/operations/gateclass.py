@@ -7,7 +7,7 @@ from functools import partial
 from typing import ClassVar
 
 from qutip import Qobj
-from qutip_qip.operations.op import Op
+from qutip_qip.operations.op import Op, op_factory
 from qutip_qip.typing import Real
 
 
@@ -144,6 +144,7 @@ class AngleParametricGate(Gate):
                 raise TypeError(f"{self.name}: parameters must be real, got {v!r}.")
 
 
+@op_factory
 def get_unitary_gate(name: str, U: Qobj) -> type[Gate]:
     """
     Gate Factory for Custom Gate that wraps an arbitrary unitary matrix U.
@@ -169,11 +170,3 @@ def get_unitary_gate(name: str, U: Qobj) -> type[Gate]:
             return U.to(dtype)
 
     return _CustomGate
-
-
-# @lru_cache(maxsize=128)
-# def _inverse_gate(gate) -> type[Gate]:
-#     """Memoised so repeated calls give the same class"""
-#     inverse = get_unitary_gate(f"{gate.name}_inv", gate.get_qobj().dag())
-#     inverse.inverse = staticmethod(lambda: gate)
-#     return inverse
