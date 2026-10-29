@@ -249,6 +249,7 @@ def controlled_gate_unitary(
     num_ctrls: int,
     ctrl_value: int,
     ctrl_dim: tuple[int, ...] | None = None,
+    dtype: str = "dense",
 ) -> Qobj:
     """
     Create an N-qubit controlled gate from a single-qubit gate U with the given
@@ -275,4 +276,4 @@ def controlled_gate_unitary(
 
     blocks = [np.eye(U.shape[0]) for _ in range(math.prod(ctrl_dim))]
     blocks[ctrl_value] = U.full()
-    return Qobj(block_diag(*blocks), dims=[list(ctrl_dim) + U.dims[0]] * 2)
+    return Qobj(block_diag(*blocks), dims=[list(ctrl_dim) + U.dims[0]] * 2, dtype=dtype)

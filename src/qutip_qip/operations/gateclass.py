@@ -138,7 +138,9 @@ class AngleParametricGate(Gate):
 
     def validate_params(self) -> None:
         for v in self.params:
-            if not isinstance(v, Real):
+            if isinstance(v, bool) or not isinstance(
+                v, Real
+            ):  # bool is an int in Python, but not an angle from our perspective
                 raise TypeError(f"{self.name}: parameters must be real, got {v!r}.")
 
 
@@ -167,3 +169,11 @@ def get_unitary_gate(name: str, U: Qobj) -> type[Gate]:
             return U.to(dtype)
 
     return _CustomGate
+
+
+# @lru_cache(maxsize=128)
+# def _inverse_gate(gate) -> type[Gate]:
+#     """Memoised so repeated calls give the same class"""
+#     inverse = get_unitary_gate(f"{gate.name}_inv", gate.get_qobj().dag())
+#     inverse.inverse = staticmethod(lambda: gate)
+#     return inverse
