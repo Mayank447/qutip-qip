@@ -56,6 +56,12 @@ class Controlled(Op):
             if not target.unitary:
                 raise TypeError(f"{cls.__name__}: target must be unitary.")
 
+            # A derived target e.g. MCX(n) only knows num_qreg per instance, validate_params will covers it.
+            if not target.is_derived and target.num_qreg < 1:
+                raise TypeError(
+                    f"{cls.__name__}: target must act on at least one register."
+                )
+
             if not isinstance(num_ctrl_qreg, Int) or num_ctrl_qreg < 1:
                 raise ValueError(
                     f"{cls.__name__}: num_ctrl_qreg must be an integer >= 1."
@@ -103,7 +109,8 @@ class Controlled(Op):
         # Run the validate_params method by buidling the target
         # For non-parametric target Op like X, validate_params is just pass be default, so it passes
         # For Parametric target Op (say RX), when we call CRX(theta), RX(theta) gets constructed which validates the params
-        self.target_op()
+        if self.target_op().num_qreg < 1:
+            raise ValueError(f"{self.name}: target must act on at least one register.")
 
     @class_or_instance_method
     def target_op(cls_ins) -> Op | type[Op]:
