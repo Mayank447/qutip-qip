@@ -181,6 +181,7 @@ class ControlledGate(Controlled, Gate):
             num_ctrls=cls_ins.num_ctrl_qreg,
             ctrl_value=cls_ins.ctrl_value,
             ctrl_dim=cls_ins.ctrl_dim,
+            dtype=dtype,
         )
 
     @class_or_instance_method

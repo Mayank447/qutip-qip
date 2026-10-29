@@ -169,4 +169,5 @@ def get_unitary_gate(name: str, U: Qobj) -> type[Gate]:
         def get_qobj(dtype=U.dtype):
             return U.to(dtype)
 
+    _CustomGate.__name__ = _CustomGate.__qualname__ = _name
     return _CustomGate
