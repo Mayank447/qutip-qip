@@ -26,8 +26,7 @@ class Controlled(Op):
     )
     ctrl_dim: ClassVar[tuple[int, ...] | None] = None  # None: qubits
 
-    # Abstract class attribute i.e. subclasses need to define
-    # target = RX   for example
+    # Abstract class attribute i.e. subclasses need to define target Op for e.g. RX
     @property
     @abstractmethod
     def target(self) -> type[Op]: ...
@@ -66,6 +65,14 @@ class Controlled(Op):
                 raise ValueError(
                     f"{cls.__name__}: num_ctrl_qreg must be an integer >= 1."
                 )
+
+            # Say if the Op we were controlling was it itself controlled e.g. CX
+            # Then it defines ctrl_dim, ctrl_value already. Using them in the MRO is incorrect
+            # Instead we should set the values retrieved from target as None and then set them in next step.
+            if vars(cls).keys() & {"num_ctrl_qreg", "ctrl_dim"}:
+                for attr in ("ctrl_dim", "ctrl_value"):
+                    if attr not in vars(cls):
+                        setattr(cls, attr, None)
 
             # Validating creg_dim, ctrl_value
             if cls.ctrl_dim is None:
