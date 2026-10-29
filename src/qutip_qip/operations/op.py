@@ -171,19 +171,6 @@ class Op(ABC, metaclass=OpMeta):
         return hash((type(self), self.params))
 
 
-def is_op(obj, kind: type[Op] = Op) -> bool:
-    if isinstance(obj, kind):
-        return True
-
-    return (
-        isinstance(obj, type)
-        and issubclass(obj, kind)
-        and obj is not Op
-        and not obj.is_parametric
-        and not inspect.isabstract(obj)
-    )
-
-
 # Class to keep track of this Op on this qubit, cbit
 @dataclass(frozen=True, slots=True)
 class OpInstruction:
@@ -225,3 +212,17 @@ def op_factory(build):
         return cls
 
     return factory
+
+
+# Helper function for other modules
+def is_op(obj, kind: type[Op] = Op) -> bool:
+    if isinstance(obj, kind):
+        return True
+
+    return (
+        isinstance(obj, type)
+        and issubclass(obj, kind)
+        and obj is not Op
+        and not obj.is_parametric
+        and not inspect.isabstract(obj)
+    )
