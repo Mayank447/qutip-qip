@@ -1,5 +1,5 @@
 import inspect
-from abc import ABC
+from abc import ABC, ABCMeta
 from dataclasses import dataclass, field, fields, MISSING
 from typing import ClassVar, dataclass_transform, get_origin
 
@@ -37,6 +37,22 @@ def _check_config(op) -> None:
         raise TypeError("self_inverse must be of type bool")
 
 
+class OpMeta(ABCMeta):
+
+    def __eq__(cls, other):
+        key = vars(cls).get("_key")
+        return cls is other or (
+            key is not None
+            and isinstance(other, OpMeta)
+            and cls.__bases__ == other.__bases__
+            and key == vars(other).get("_key")
+        )
+
+    def __hash__(cls):
+        key = vars(cls).get("_key")
+        return type.__hash__(cls) if key is None else hash(key)
+
+
 # Think of userdefined Op as Op Factory, takes params and returns a Op
 # We need it because we want something like
 # class MultiSWAP(ParametricOp):
@@ -51,7 +67,7 @@ def _check_config(op) -> None:
 # Note: dataclass transform is just a typehint to indicate that
 # the inherited classes will be a dataclass.
 @dataclass_transform(frozen_default=True)
-class Op(ABC):
+class Op(ABC, metaclass=OpMeta):
     """
     Base class of every operation. Operations are defined by subclassing.
     """
@@ -134,6 +150,16 @@ class Op(ABC):
         if not self.params:
             return self.name
         return f"{self.name}({', '.join(map(str, self.params))})"
+
+    def __eq__(self, other) -> bool:
+        return (
+            isinstance(other, Op)
+            and type(self) is type(other)
+            and self.params == other.params
+        )
+
+    def __hash__(self) -> int:
+        return hash((type(self), self.params))
 
 
 def is_op(obj, kind: type[Op] = Op) -> bool:

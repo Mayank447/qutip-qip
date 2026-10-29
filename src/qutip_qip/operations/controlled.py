@@ -92,6 +92,9 @@ class Controlled(Op):
             if not isinstance(cls.ctrl_value, Int) or not 0 <= cls.ctrl_value < size:
                 raise ValueError(f"{cls.__name__}: ctrl_value must be in [0, {size}).")
 
+            # Acts as hash (identity) for a Controlled Op
+            cls._key = (target, num_ctrl_qreg, cls.ctrl_value, cls.ctrl_dim)
+
             for attr, rule in cls._derived.items():
                 if target.is_derived:  # e.g. MCX(n)
                     setattr(
@@ -211,6 +214,11 @@ def controlled(
     ctrl_dim: tuple[int, ...] | None = None,
     name: str | None = None,
 ) -> type[Controlled]:
+
+    if not isinstance(target, type):
+        raise TypeError(
+            f"controlled() takes an op class, e.g. controlled(RX), got {target!r}."
+        )
 
     # What are we controlling a Gate or an Op
     base_class = ControlledGate if issubclass(target, Gate) else Controlled
