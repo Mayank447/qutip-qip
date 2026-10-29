@@ -99,4 +99,4 @@ class Measurement(Op):
         return str(self)
 
 
-Mz = Measurement()
+Mz = Measurement
