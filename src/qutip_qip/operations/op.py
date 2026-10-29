@@ -1,6 +1,6 @@
 import inspect
 from abc import ABC
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field, fields, MISSING
 from typing import ClassVar, dataclass_transform, get_origin
 
 from qutip_qip.typing import Int
@@ -87,12 +87,14 @@ class Op(ABC):
         for attr in cls.config & ann.keys():
             if get_origin(ann[attr]) is not ClassVar:
                 ann[attr] = ClassVar[ann[attr]]
+        cls.__annotations__ = ann
 
         #  If name attribute in subclass is not defined, set it to the name of the subclass
         if "name" not in vars(cls):
             cls.name = cls.__name__
 
         dataclass(frozen=True, repr=False)(cls)
+
         cls.is_controlled = "target" in cls.config
         cls.is_parametric = bool(fields(cls))
         if cls.is_parametric:
