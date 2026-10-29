@@ -166,8 +166,7 @@ class ControlledGate(Controlled, Gate):
             raise TypeError(f"{cls.__name__}: target must be a Gate.")
 
     @class_or_instance_method
-    @lru_cache(maxsize=128)
-    def get_qobj(cls_ins, dtype: str = "dense") -> Qobj:
+    def compute_qobj(cls_ins, dtype: str = "dense") -> Qobj:
         """
         Construct the full Qobj representation of the controlled gate.
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import inspect
 import warnings
 from abc import abstractmethod
-from functools import partial
+from functools import lru_cache, partial
 from typing import ClassVar
 
 from qutip import Qobj
@@ -20,6 +20,16 @@ class class_or_instance_method:
 
     def __get__(self, obj, owner):
         return partial(self.f, owner if obj is None else obj)
+
+
+class cached_class_or_instance_method(class_or_instance_method):
+    def __set_name__(self, owner, name):
+        self.slot = f"_{name}_cache"
+
+    def __get__(self, obj, owner):
+        if self.slot not in vars(owner):
+            setattr(owner, self.slot, lru_cache(maxsize=128)(self.f))
+        return partial(vars(owner)[self.slot], owner if obj is None else obj)
 
 
 class Gate(Op):
@@ -72,7 +82,7 @@ class Gate(Op):
         if "latex_str" not in vars(cls):
             cls.latex_str = cls.name
 
-        if "dtype" not in inspect.signature(cls.get_qobj).parameters:
+        if "dtype" not in inspect.signature(cls.compute_qobj).parameters:
             raise TypeError(f"{cls.name}.get_qobj must accept a dtype parameter.")
 
         if not isinstance(cls.is_clifford, bool):
@@ -95,7 +105,12 @@ class Gate(Op):
         cls.num_qubits = cls.num_qreg  # TODO: delete this
 
     @abstractmethod
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
+        """Build the gate's unitary. User's need to implement this"""
+        raise NotImplementedError
+
+    @cached_class_or_instance_method
+    def get_qobj(cls_ins, dtype: str = "dense") -> Qobj:
         """
         Get the :class:`qutip.Qobj` representation of the gate operator.
 
@@ -104,7 +119,7 @@ class Gate(Op):
         qobj : :obj:`qutip.Qobj`
             The compact gate operator as a unitary matrix.
         """
-        raise NotImplementedError
+        return cls_ins.compute_qobj(dtype)
 
     @class_or_instance_method
     def inverse(cls_ins) -> Gate | type[Gate]:
@@ -165,8 +180,7 @@ def get_unitary_gate(name: str, U: Qobj) -> type[Gate]:
         qreg_dim = tuple(U.dims[0])
         self_inverse = U == U.dag()
 
-        @staticmethod
-        def get_qobj(dtype=U.dtype):
+        def compute_qobj(dtype=U.dtype):
             return U.to(dtype)
 
     _CustomGate.__name__ = _CustomGate.__qualname__ = _name

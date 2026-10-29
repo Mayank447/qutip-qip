@@ -1,4 +1,3 @@
-from functools import cache, lru_cache
 import numpy as np
 
 from qutip import Qobj, sigmax, sigmay, sigmaz, qeye
@@ -36,8 +35,7 @@ class X(_SingleQubitGate):
     latex_str: str = r"X"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return sigmax(dtype=dtype)
 
 
@@ -60,8 +58,7 @@ class Y(_SingleQubitGate):
     latex_str: str = r"Y"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return sigmay(dtype=dtype)
 
 
@@ -84,8 +81,7 @@ class Z(_SingleQubitGate):
     latex_str: str = r"Z"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return sigmaz(dtype=dtype)
 
 
@@ -108,8 +104,7 @@ class IDENTITY(_SingleQubitGate):
     latex_str: str = r"{\rm I}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return qeye(2, dtype=dtype)
 
 
@@ -132,8 +127,7 @@ class H(_SingleQubitGate):
     latex_str: str = r"H"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         sq_half = 1 / np.sqrt(2.0)
         return Qobj([[sq_half, sq_half], [sq_half, -sq_half]], dtype=dtype)
 
@@ -160,8 +154,7 @@ class SQRTX(_SingleQubitGate):
     latex_str: str = r"\sqrt{\rm X}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj([[0.5 + 0.5j, 0.5 - 0.5j], [0.5 - 0.5j, 0.5 + 0.5j]], dtype=dtype)
 
     @staticmethod
@@ -188,8 +181,7 @@ class SQRTXdag(_SingleQubitGate):
     latex_str: str = r"\sqrt{\rm X}^\dagger"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj([[0.5 - 0.5j, 0.5 + 0.5j], [0.5 + 0.5j, 0.5 - 0.5j]], dtype=dtype)
 
     @staticmethod
@@ -219,8 +211,7 @@ class S(_SingleQubitGate):
     latex_str: str = r"{\rm S}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj([[1, 0], [0, 1j]], dtype=dtype)
 
     @staticmethod
@@ -247,8 +238,7 @@ class Sdag(_SingleQubitGate):
     latex_str: str = r"{\rm S^\dagger}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj([[1, 0], [0, -1j]], dtype=dtype)
 
     @staticmethod
@@ -274,8 +264,7 @@ class T(_SingleQubitGate):
     latex_str: str = r"{\rm T}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj([[1, 0], [0, np.exp(1j * np.pi / 4)]], dtype=dtype)
 
     @staticmethod
@@ -301,8 +290,7 @@ class Tdag(_SingleQubitGate):
     latex_str: str = r"{\rm Tdag}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj([[1, 0], [0, np.exp(-1j * np.pi / 4)]], dtype=dtype)
 
     @staticmethod
@@ -345,8 +333,7 @@ class RX(_SingleQubitParametricGate):
     theta: float
     latex_str: str = r"R_x"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [np.cos(self.theta / 2), -1j * np.sin(self.theta / 2)],
@@ -395,8 +382,7 @@ class RY(_SingleQubitParametricGate):
     theta: float
     latex_str: str = r"R_y"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [np.cos(self.theta / 2), -np.sin(self.theta / 2)],
@@ -445,8 +431,7 @@ class RZ(_SingleQubitParametricGate):
     theta: float
     latex_str: str = r"R_z"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [[np.exp(-1j * self.theta / 2), 0], [0, np.exp(1j * self.theta / 2)]],
             dims=[[2], [2]],
@@ -492,8 +477,7 @@ class PHASE(_SingleQubitParametricGate):
     theta: float
     latex_str: str = r"PHASE"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [[1, 0], [0, np.exp(1j * self.theta)]],
             dims=[[2], [2]],
@@ -543,8 +527,7 @@ class R(_SingleQubitParametricGate):
     theta: float
     latex_str: str = r"{\rm R}"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [
@@ -605,8 +588,7 @@ class QASMU(_SingleQubitParametricGate):
     gamma: float
     latex_str: str = r"{\rm QASMU}"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [
@@ -669,8 +651,7 @@ class IDLE(_SingleQubitParametricGate):
         if self.T < 0:
             raise ValueError(f"IDLE time must be non-negative, got {self.T}")
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         # Practically not required as this gate is only useful in pulse level
         # simulation, and the pulse compiler implementation of it will be
         # independent of get_qobj()

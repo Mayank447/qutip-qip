@@ -1,5 +1,4 @@
 import warnings
-from functools import cache
 
 import scipy.sparse as sp
 import numpy as np
@@ -55,7 +54,7 @@ class GLOBALPHASE(AngleParametricGate):
         )
         super().__post_init__()
 
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         r"""
         Return the scalar Qobj corresponding to the global phase factor
         :math:`e^{i \theta}`.
@@ -125,8 +124,7 @@ class TOFFOLI(ControlledGate):
     latex_str: str = r"{\rm TOFFOLI}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [1, 0, 0, 0, 0, 0, 0, 0],
@@ -170,8 +168,7 @@ class FREDKIN(ControlledGate):
     latex_str: str = r"{\rm FREDKIN}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [1, 0, 0, 0, 0, 0, 0, 0],

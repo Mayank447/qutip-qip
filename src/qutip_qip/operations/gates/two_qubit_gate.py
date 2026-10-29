@@ -1,5 +1,3 @@
-from functools import cache, lru_cache
-
 import numpy as np
 from qutip import Qobj
 
@@ -67,8 +65,7 @@ class SWAP(_TwoQubitGate):
     latex_str: str = r"{\rm SWAP}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             [[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]],
             dims=[[2, 2], [2, 2]],
@@ -104,8 +101,7 @@ class ISWAP(_TwoQubitGate):
     latex_str: str = r"{i}{\rm SWAP}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             [[1, 0, 0, 0], [0, 0, 1j, 0], [0, 1j, 0, 0], [0, 0, 0, 1]],
             dims=[[2, 2], [2, 2]],
@@ -142,8 +138,7 @@ class ISWAPdag(_TwoQubitGate):
     latex_str: str = r"{i}{\rm SWAP^\dagger}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             [[1, 0, 0, 0], [0, 0, -1j, 0], [0, -1j, 0, 0], [0, 0, 0, 1]],
             dims=[[2, 2], [2, 2]],
@@ -195,8 +190,7 @@ class SQRTSWAP(_TwoQubitGate):
     latex_str: str = r"\sqrt{\rm SWAP}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             np.array(
                 [
@@ -234,8 +228,7 @@ class SQRTSWAPdag(_TwoQubitGate):
     latex_str: str = r"\sqrt{\rm SWAP}^\dagger"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             np.array(
                 [
@@ -282,8 +275,7 @@ class SQRTISWAP(_TwoQubitGate):
     latex_str: str = r"\sqrt{{i}\rm SWAP}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             np.array(
                 [
@@ -322,8 +314,7 @@ class SQRTISWAPdag(_TwoQubitGate):
     latex_str: str = r"\sqrt{{i}\rm SWAP}^\dagger"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             np.array(
                 [
@@ -379,8 +370,7 @@ class BERKELEY(_TwoQubitGate):
     latex_str: str = r"{\rm BERKELEY}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [np.cos(np.pi / 8), 0, 0, 1.0j * np.sin(np.pi / 8)],
@@ -425,8 +415,7 @@ class BERKELEYdag(_TwoQubitGate):
     latex_str: str = r"{\rm BERKELEY^\dagger}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [np.cos(np.pi / 8), 0, 0, -1.0j * np.sin(np.pi / 8)],
@@ -486,8 +475,7 @@ class SWAPALPHA(_TwoQubitParametricGate):
     alpha: float
     latex_str: str = r"{\rm SWAPALPHA}"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [1, 0, 0, 0],
@@ -557,8 +545,7 @@ class MS(_TwoQubitParametricGate):
     phi: float
     latex_str: str = r"{\rm MS}"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [
@@ -627,8 +614,7 @@ class RZX(_TwoQubitParametricGate):
     theta: float
     latex_str: str = r"{\rm RZX}"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             np.array(
                 [
@@ -667,8 +653,7 @@ class CX(_ControlledTwoQubitGate):
     latex_str: str = r"{\rm CNOT}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]],
             dims=[[2, 2], [2, 2]],
@@ -700,8 +685,7 @@ class CY(_ControlledTwoQubitGate):
     latex_str: str = r"{\rm CY}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, -1j], [0, 0, 1j, 0]],
             dims=[[2, 2], [2, 2]],
@@ -730,8 +714,7 @@ class CZ(_ControlledTwoQubitGate):
     latex_str: str = r"{\rm CZ}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, -1]],
             dims=[[2, 2], [2, 2]],
@@ -771,8 +754,7 @@ class CH(_ControlledTwoQubitGate):
     latex_str: str = r"{\rm CH}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         sq_2 = 1 / np.sqrt(2)
         return Qobj(
             [
@@ -815,8 +797,7 @@ class CT(_ControlledTwoQubitGate):
     latex_str: str = r"{\rm CT}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [1, 0, 0, 0],
@@ -862,8 +843,7 @@ class CTdag(_ControlledTwoQubitGate):
     latex_str: str = r"{\rm CT^\dagger}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [1, 0, 0, 0],
@@ -909,8 +889,7 @@ class CS(_ControlledTwoQubitGate):
     latex_str: str = r"{\rm CS}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1j]]),
             dims=[[2, 2], [2, 2]],
@@ -951,8 +930,7 @@ class CSdag(_ControlledTwoQubitGate):
     latex_str: str = r"{\rm CS^\dagger}"
 
     @staticmethod
-    @cache
-    def get_qobj(dtype: str = "dense") -> Qobj:
+    def compute_qobj(dtype: str = "dense") -> Qobj:
         return Qobj(
             np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, -1j]]),
             dims=[[2, 2], [2, 2]],
@@ -990,8 +968,7 @@ class CRX(_ControlledTwoQubitGate):
     target: type[Gate] = RX
     latex_str: str = r"{\rm CRX}"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [1, 0, 0, 0],
@@ -1033,8 +1010,7 @@ class CRY(_ControlledTwoQubitGate):
     target: type[Gate] = RY
     latex_str: str = r"{\rm CRY}"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [1, 0, 0, 0],
@@ -1076,8 +1052,7 @@ class CRZ(_ControlledTwoQubitGate):
     target: type[Gate] = RZ
     latex_str: str = r"{\rm CRZ}"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [1, 0, 0, 0],
@@ -1131,8 +1106,7 @@ class CPHASE(_ControlledTwoQubitGate):
     target: type[Gate] = PHASE
     latex_str: str = r"{\rm CPHASE}"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [1, 0, 0, 0],
@@ -1185,8 +1159,7 @@ class CQASMU(_ControlledTwoQubitGate):
     target: type[Gate] = QASMU
     latex_str: str = r"{\rm CQASMU}"
 
-    @lru_cache(maxsize=128)
-    def get_qobj(self, dtype: str = "dense") -> Qobj:
+    def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return Qobj(
             [
                 [1, 0, 0, 0],
