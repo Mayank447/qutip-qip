@@ -96,9 +96,9 @@ class Controlled(Op):
                     setattr(cls, attr, rule(cls, target))
 
             # The target Op's parameters e.g. theta in RX, become parameter of the Controlled Op as well.
-            cls.__annotations__ = {f.name: f.type for f in fields(target)} | vars(
-                cls
-            ).get("__annotations__", {})
+            cls.__annotations__ = {f.name: f.type for f in fields(target)} | dict(
+                cls.__annotations__
+            )
             for f in fields(target):
                 if f.default is not MISSING:
                     setattr(cls, f.name, f.default)

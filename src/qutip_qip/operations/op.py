@@ -83,7 +83,7 @@ class Op(ABC):
         # Now num_qreg is a parameter i.e it shows in __eq__ and ParametricOp(num_qreg=7) is accepted (which we don't want).
 
         # So we keep the annotation for field matching _CONFIG just we can ignore them by making them a ClassVar.
-        ann = vars(cls).get("__annotations__", {})
+        ann = dict(cls.__annotations__)
         for attr in cls.config & ann.keys():
             if get_origin(ann[attr]) is not ClassVar:
                 ann[attr] = ClassVar[ann[attr]]
