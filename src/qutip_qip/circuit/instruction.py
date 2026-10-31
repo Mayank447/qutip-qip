@@ -76,9 +76,9 @@ class GateInstruction(CircuitInstruction):
         if not (isinstance(self.operation, Gate) or issubclass(self.operation, Gate)):
             raise TypeError(f"Operation must be a Gate, got {self.operation}")
 
-        if len(self.qubits) != self.operation.num_qubits:
+        if len(self.qubits) != self.operation.num_qreg:
             raise ValueError(
-                f"Gate '{self.operation.name}' requires {self.operation.num_qubits} qubits."
+                f"Gate '{self.operation.name}' requires {self.operation.num_qreg} qubits."
                 f" But got {len(self.qubits)}."
             )
 
@@ -101,13 +101,13 @@ class GateInstruction(CircuitInstruction):
     @property
     def controls(self) -> tuple[int, ...]:
         if self.operation.is_controlled:
-            return self.qubits[: self.operation.num_ctrl_qubits]
+            return self.qubits[: self.operation.num_ctrl_qreg]
         return ()
 
     @property
     def targets(self) -> tuple[int, ...]:
         if self.operation.is_controlled:
-            return self.qubits[self.operation.num_ctrl_qubits :]
+            return self.qubits[self.operation.num_ctrl_qreg :]
         return self.qubits
 
     @staticmethod

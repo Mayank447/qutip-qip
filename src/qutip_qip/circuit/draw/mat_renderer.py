@@ -779,8 +779,8 @@ class MatRenderer(BaseRenderer):
                 targets = qubits
 
                 if gate.is_controlled:
-                    controls = qubits[: gate.num_ctrl_qubits]
-                    targets = qubits[gate.num_ctrl_qubits :]
+                    controls = qubits[: gate.num_ctrl_qreg]
+                    targets = qubits[gate.num_ctrl_qreg :]
 
                 style = style if style is not None else {}
                 self.text = gate.name

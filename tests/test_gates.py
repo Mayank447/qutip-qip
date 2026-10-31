@@ -214,7 +214,7 @@ class TestGateExpansion:
         base = qutip.rand_ket(2)
         if n_angles > 0:
             angles = 2 * np.pi * (np.random.rand(n_angles))
-            gate = gate(angles)
+            gate = gate(*angles)
 
         applied = gate.get_qobj() * base
         random = [qutip.rand_ket(2) for _ in [None] * (self.n_qubits - 1)]
@@ -396,7 +396,7 @@ class U1(Gate):
 
 class U2(AngleParametricGate):
     num_qubits = 1
-    num_params = 1
+    theta: float
 
     def get_qobj(self, dtype: str = "dense"):
         theta = self.arg_value[0]
@@ -579,7 +579,8 @@ class TestGateErrors:
 
         class GoodParamGate(AngleParametricGate):
             num_qubits = 1
-            num_params = 2
+            theta: float
+            phi: float
 
             def get_qobj(self, dtype):
                 return qutip.qeye(2)
@@ -611,54 +612,32 @@ class TestGateErrors:
         with pytest.raises(TypeError):
 
             class BadCtrlGate(ControlledGate):
-                target_gate = gates.RX(
-                    0
-                )  # target_gate must be a gate subclass not an instantiated object
-                num_ctrl_qubits = 1
+                num_ctrl_qreg = 1
                 ctrl_value = 1
-                num_qubits = 2
+                target = gates.RX(
+                    0
+                )  # target gate must be a gate subclass not an instantiated object
 
         with pytest.raises(TypeError):
 
             class BadCtrlGate2(ControlledGate):
-                target_gate = gates.X
-                num_ctrl_qubits = -1  # Can't be negative
+                target = gates.X
+                num_ctrl_qreg = -1  # Can't be negative
                 ctrl_value = 1
-                num_qubits = 2
-
-        with pytest.raises(ValueError):
-
-            class BadCtrlGate3(ControlledGate):
-                target_gate = gates.X
-                num_qubits = 2
-                num_ctrl_qubits = 2  # Must be less than num_qubit
-                ctrl_value = 1
-
-        with pytest.raises(AttributeError):
-
-            class BadCtrlGate4(ControlledGate):
-                target_gate = gates.X
-                num_ctrl_qubits = (
-                    1  # No of control qubits must be 2, since target gate is X
-                )
-                ctrl_value = 1
-                num_qubits = 3
 
         with pytest.raises(TypeError):
 
-            class BadCtrlGate5(ControlledGate):
-                target_gate = gates.X
-                num_ctrl_qubits = 1
+            class BadCtrlGate3(ControlledGate):
+                target = gates.X
+                num_ctrl_qreg = 1
                 ctrl_value = 1.5  # Control value must be an int
-                num_qubits = 2
 
         with pytest.raises(ValueError):
 
-            class BadCtrlGate6(ControlledGate):
-                target_gate = gates.X
-                num_ctrl_qubits = 1
+            class BadCtrlGate4(ControlledGate):
+                target = gates.X
+                num_ctrl_qreg = 1
                 ctrl_value = 2  # Control value can't be greater than 1 in this case
-                num_qubits = 2
 
     def test_utils_errors(self):
         from qutip_qip.operations.utils import (
@@ -706,7 +685,7 @@ class TestGateErrors:
             controlled(gates.X, n_ctrl_qubits=1, control_value=2)
 
         with pytest.raises(TypeError):
-            controlled(gates.X, n_ctrl_qubits=0)  # num_ctrl_qubits > 0
+            controlled(gates.X, n_ctrl_qubits=0)  # num_ctrl_qreg > 0
 
     def test_class_attribute_modification(self):
         with pytest.raises(AttributeError):
@@ -719,16 +698,16 @@ class TestGateErrors:
             gates.X.self_inverse = False
 
         with pytest.raises(AttributeError):
-            gates.CX.num_ctrl_qubits = 0
+            gates.CX.num_ctrl_qreg = 0
 
         with pytest.raises(AttributeError):
             gates.CX.ctrl_value = 0
 
         with pytest.raises(AttributeError):
-            gates.CX.target_gate = gates.Y
+            gates.CX.target = gates.Y
 
-        with pytest.raises(AttributeError):
-            gates.RX.num_params = 2
+        # with pytest.raises(AttributeError):
+        #     len(gates.RX.params) = 2
 
         with pytest.raises(AttributeError):
             gates.RY.latex_str = "R_y"

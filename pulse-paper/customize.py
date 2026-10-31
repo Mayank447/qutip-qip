@@ -28,11 +28,8 @@ TEXTWIDTH = 7.1398920714
 
 
 class ROT(AngleParametricGate):
-    num_qubits = 1
-    num_params = 1
-
-    def __init__(self, arg_value):
-        super().__init__(arg_value)
+    num_qreg = 1
+    theta: float
 
     def get_qobj(self, dtype) -> Qobj:
         # This is not required, because Pulse level implementation
@@ -228,7 +225,7 @@ def single_crosstalk_simulation(num_gates):
 
     # Define a random circuit.
     gates_set = [
-        ROT(arg_value=0),
+        ROT(0),
         ROT(np.pi / 2),
         ROT(np.pi),
         ROT(np.pi / 2 * 3),

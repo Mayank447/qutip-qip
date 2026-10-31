@@ -19,7 +19,7 @@ class TestQPE(unittest.TestCase):
         """
         U = Qobj([[0, 1], [1, 0]])
 
-        custom = get_unitary_gate(gate_name="custom", U=U)
+        custom = get_unitary_gate(name="custom", U=U)
         qobj = custom.get_qobj()
         assert_((qobj - U).norm() < 1e-12)
 
@@ -30,11 +30,11 @@ class TestQPE(unittest.TestCase):
         U = Qobj([[0, 1], [1, 0]])
 
         controlled_u = controlled(
-            gate=get_unitary_gate(gate_name="CU", U=U),
+            gate=get_unitary_gate(name="CU", U=U),
         )
 
         assert_equal(controlled_u.ctrl_value, 1)
-        assert_((controlled_u.target_gate.get_qobj() - U).norm() < 1e-12)
+        assert_((controlled_u.target.get_qobj() - U).norm() < 1e-12)
 
     def test_qpe_validation(self):
         """
@@ -109,7 +109,7 @@ class TestQPE(unittest.TestCase):
             gate = circuit.instructions[num_counting + i].operation
             power = 2 ** (num_counting - i - 1)
 
-            u_power = gate.target_gate.get_qobj()
+            u_power = gate.target.get_qobj()
             expected_u_power = U if power == 1 else U**power
 
             assert_((u_power - expected_u_power).norm() < 1e-12)

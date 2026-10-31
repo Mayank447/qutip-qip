@@ -554,8 +554,8 @@ class TestQubitCircuit:
         mat3 = qutip.rand_unitary(3)
 
         class CTRLMAT3(Gate):
-            num_qubits = 2
-            self_inverse = False
+            num_qreg = 2
+            qreg_dim = (2, 3)
 
             def validate_params(self):
                 pass

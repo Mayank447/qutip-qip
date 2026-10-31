@@ -197,7 +197,7 @@ class QubitCircuit:
                 for parameter in parameters
             )
             sample_unitary = user_gate_callable(*sample_arg_value)
-            _num_qubits = int(np.log2(sample_unitary.shape[0]))
+            _num_qreg = int(np.log2(sample_unitary.shape[0]))
             _num_params = num_params
 
             # Without it, if you write get_qobj directly in the loop and reference
@@ -212,10 +212,10 @@ class QubitCircuit:
             class _OldUserParametricGate(AngleParametricGate):
                 __slots__ = ()
                 name = gate_name
-                num_qubits = _num_qubits
-                num_params = _num_params
+                num_qreg = _num_qreg
+                __annotations__ = {f"arg{i}": float for i in range(_num_params)}
 
-                get_qobj = _make_get_qobj(user_gate_callable)
+                compute_qobj = _make_get_qobj(user_gate_callable)
 
             gate_classes[gate_name] = _OldUserParametricGate
 
@@ -450,7 +450,7 @@ class QubitCircuit:
                 "'control_value' is no longer a valid argument and has been deprecated and will be removed in the future version.\n"
                 "from qutip_qip.operations import controlled\n"
                 "from qutip_qip.operations.gates import X\n"
-                "Example: gate = controlled(X, num_ctrl_qubits=1, control_value=0)\n"
+                "Example: gate = controlled(X, num_ctrl_qreg=1, ctrl_value=0)\n"
                 "Please refer to the tutorial for the recommended way to define them:\n"
                 "https://nbviewer.org/urls/qutip.org/qutip-tutorials/tutorials-v5/quantum-circuits/quantum-gates.ipynb",
                 DeprecationWarning,
@@ -518,15 +518,14 @@ class QubitCircuit:
         check_limit("controls", controls, 0, self.num_qubits - 1)
         check_limit("classical_controls", classical_controls, 0, self.num_cbits - 1)
 
-        # Check len(controls) == gate.num_ctrl_qubits
-        if gate.is_controlled and len(controls) != gate.num_ctrl_qubits:
+        if gate.is_controlled and len(controls) != gate.num_ctrl_qreg:
             raise ValueError(
-                f"{gate.name} takes {gate.num_ctrl_qubits} qubits, but {len(controls)} were provided."
+                f"{gate.name} takes {gate.num_ctrl_qreg} qreg, but {len(controls)} were provided."
             )
 
-        if len(controls) + len(targets) != gate.num_qubits:
+        if len(controls) + len(targets) != gate.num_qreg:
             raise ValueError(
-                f"{gate.name} takes {gate.num_qubits} qubits, but {len(controls) + len(targets)} were provided."
+                f"{gate.name} takes {gate.num_qreg} qreg, but {len(controls) + len(targets)} were provided."
             )
 
         # Check for classical control

@@ -75,8 +75,8 @@ class TeXRenderer:
                 controls = []
 
                 if gate.is_controlled:
-                    controls = qubits[: gate.num_ctrl_qubits]
-                    targets = qubits[gate.num_ctrl_qubits :]
+                    controls = qubits[: gate.num_ctrl_qreg]
+                    targets = qubits[gate.num_ctrl_qreg :]
 
                 col = []
                 _swap_processing = False

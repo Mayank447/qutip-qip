@@ -703,7 +703,7 @@ class QasmProcessor:
                 if custom_gate_unitary is not None:
                     # Instantiate the wrapper gate
                     gate_obj = get_unitary_gate(
-                        gate_name=gate_name,
+                        name=gate_name,
                         U=custom_gate_unitary,
                     )
                     qc.add_gate(

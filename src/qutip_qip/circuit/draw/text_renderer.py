@@ -426,8 +426,8 @@ class TextRenderer(BaseRenderer):
                 controls = []
 
                 if gate.is_controlled:
-                    controls = qubits[: gate.num_ctrl_qubits]
-                    targets = qubits[gate.num_ctrl_qubits :]
+                    controls = qubits[: gate.num_ctrl_qreg]
+                    targets = qubits[gate.num_ctrl_qreg :]
 
                 if gate.is_parametric and gate.arg_label is not None:
                     gate_text = gate.arg_label
