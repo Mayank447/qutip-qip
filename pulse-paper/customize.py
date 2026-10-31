@@ -31,7 +31,7 @@ class ROT(AngleParametricGate):
     num_qreg = 1
     theta: float
 
-    def get_qobj(self, dtype) -> Qobj:
+    def compute_qobj(self, dtype) -> Qobj:
         # This is not required, because Pulse level implementation
         # of this gate is already provided.
         pass

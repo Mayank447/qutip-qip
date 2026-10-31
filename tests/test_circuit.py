@@ -169,13 +169,10 @@ class TestQubitCircuit:
         assert qc.instructions[7].operation.arg_value[0] == -np.pi / 2
 
         class DUMMY1(Gate):
-            num_qubits = 1
+            num_qreg = 1
             self_inverse = False
 
-            def __init__(self, **kwargs):
-                super().__init__(**kwargs)
-
-            def get_qobj(self, dtype):
+            def compute_qobj(self, dtype):
                 pass
 
         class DUMMY2(DUMMY1):
@@ -473,14 +470,11 @@ class TestQubitCircuit:
             return Qobj(mat, dims=[[2, 2], [2, 2]])
 
         class T1(Gate):
-            num_qubits = 1
+            num_qreg = 1
             self_inverse = True
 
-            def __init__(self):
-                pass
-
             @staticmethod
-            def get_qobj(dtype="Dense"):
+            def compute_qobj(dtype="Dense"):
                 mat = np.array([[1.0, 0], [0.0, 1.0j]])
                 return Qobj(mat, dims=[[2], [2]])
 
@@ -561,7 +555,7 @@ class TestQubitCircuit:
                 pass
 
             @staticmethod
-            def get_qobj(dtype="Dense"):
+            def compute_qobj(dtype="Dense"):
                 """
                 A qubit control an operator acting on a 3 level system
                 """
@@ -908,7 +902,7 @@ class TestAddGateError:
 
         with pytest.raises(TypeError):
 
-            class AbstractGate(Gate): ...  # Doesn't define num_qubits, get_qobj
+            class AbstractGate(Gate): ...  # Doesn't define num_qreg, get_qobj
 
             qc.add_gate(AbstractGate)
 
@@ -1030,7 +1024,7 @@ class TestInstructionErrors:
         with pytest.warns(DeprecationWarning):
             assert instr.name == "RX"
         with pytest.warns(DeprecationWarning):
-            assert instr.num_qubits == 1
+            assert instr.num_qreg == 1
         with pytest.warns(DeprecationWarning):
             assert np.isclose(instr.arg_value, np.pi / 3)
 

@@ -165,9 +165,9 @@ def qc3():
 
 @pytest.fixture
 def qc4():
-    i = controlled(IDENTITY, n_ctrl_qubits=1, gate_name="i")
-    ii = controlled(IDENTITY, n_ctrl_qubits=2, gate_name="ii")
-    iii = controlled(IDENTITY, n_ctrl_qubits=1, control_value=0, gate_name="iii")
+    i = controlled(IDENTITY, num_ctrl_qreg=1, gate_name="i")
+    ii = controlled(IDENTITY, num_ctrl_qreg=2, gate_name="ii")
+    iii = controlled(IDENTITY, num_ctrl_qreg=1, control_value=0, gate_name="iii")
 
     qc = QubitCircuit(5, num_cbits=2)
     qc.add_gate(X, targets=0, classical_controls=[0, 1], classical_control_value=0)

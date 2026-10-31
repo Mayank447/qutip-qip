@@ -84,14 +84,14 @@ def test_compiling_gates_different_sampling_number():
         num_qreg = 1
         theta: float
 
-        def get_qobj(self, dtype):
+        def compute_qobj(self, dtype):
             pass
 
     class U2(AngleParametricGate):
         num_qreg = 2
         theta: float
 
-        def get_qobj(self, dtype):
+        def compute_qobj(self, dtype):
             pass
 
     num_qubits = 2

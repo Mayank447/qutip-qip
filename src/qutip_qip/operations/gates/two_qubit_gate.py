@@ -532,7 +532,7 @@ class MS(_TwoQubitParametricGate):
     Examples
     --------
     >>> from qutip_qip.operations.gates import MS
-    >>> MS((np.pi/2, 0)).get_qobj()
+    >>> MS(np.pi/2, 0).get_qobj()
     Quantum object: dims=[[2, 2], [2, 2]], shape=(4, 4), type='oper', dtype=Dense, isherm=False
     Qobj data =
     [[0.70710678+0.j         0.        +0.j         0.        +0.j         0.        -0.70710678j]
@@ -1147,7 +1147,7 @@ class CQASMU(_ControlledTwoQubitGate):
     --------
     >>> from qutip_qip.operations.gates import CQASMU
     >>> from math import pi
-    >>> CQASMU((pi/2, pi, pi/2)).get_qobj()
+    >>> CQASMU(pi/2, pi, pi/2).get_qobj()
     Quantum object: dims=[[2, 2], [2, 2]], shape=(4, 4), type='oper', dtype=Dense, isherm=False
     Qobj data =
     [[ 1. +0.j   0. +0.j   0. +0.j   0. +0.j ]

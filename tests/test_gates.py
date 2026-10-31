@@ -387,7 +387,7 @@ rand_U = qutip.rand_unitary(dimensions=[2], seed=rng)
 
 
 class U1(Gate):
-    num_qubits = 1
+    num_qreg = 1
 
     @staticmethod
     def get_qobj(dtype: str = "dense"):
@@ -497,51 +497,51 @@ class TestGateErrors:
         with pytest.raises(TypeError):
 
             class BadGate(Gate):
-                num_qubits = -1
+                num_qreg = -1
 
-                def get_qobj(cls):
+                def compute_qobj(cls):
                     pass
 
         with pytest.raises(TypeError):
 
             class BadGate2(Gate):
-                num_qubits = 1
+                num_qreg = 1
                 is_clifford = 1  # attribute 'is_clifford' must be a bool
 
-                def get_qobj(dtype):
+                def compute_qobj(dtype):
                     pass
 
         with pytest.raises(TypeError):
 
             class BadGate3(Gate):
-                num_qubits = 1
+                num_qreg = 1
                 self_inverse = 1  # attribute 'self_inverse' must be a bool
 
-                def get_qobj(dtype):
+                def compute_qobj(dtype):
                     pass
 
         with pytest.raises(TypeError):
 
             class BadGate4(Gate):
-                num_qubits = 1
+                num_qreg = 1
                 self_inverse = True
 
-                def get_qobj(dtype):
+                def compute_qobj(dtype):
                     pass
 
                 def inverse(cls):
                     pass  # Can't define inverse method is self_inverse=True
 
         class GoodGate(Gate):
-            num_qubits = 1
+            num_qreg = 1
 
             @staticmethod
-            def get_qobj(dtype):
+            def compute_qobj(dtype):
                 pass
 
         with pytest.raises(AttributeError):
             # For a given gateclass, class attribute like num_qubit can't be modified
-            GoodGate.num_qubits = 2
+            GoodGate.num_qreg = 2
 
         U_rect = qutip.Qobj(np.eye(2, 3))
         with pytest.raises(ValueError):
@@ -578,7 +578,7 @@ class TestGateErrors:
                 is_parametric = 1  # must return a bool
 
         class GoodParamGate(AngleParametricGate):
-            num_qubits = 1
+            num_qreg = 1
             theta: float
             phi: float
 
@@ -682,14 +682,14 @@ class TestGateErrors:
 
         # Control_value > 2^n -1
         with pytest.raises(ValueError):
-            controlled(gates.X, n_ctrl_qubits=1, control_value=2)
+            controlled(gates.X, num_ctrl_qreg=1, control_value=2)
 
         with pytest.raises(TypeError):
-            controlled(gates.X, n_ctrl_qubits=0)  # num_ctrl_qreg > 0
+            controlled(gates.X, num_ctrl_qreg=0)  # num_ctrl_qreg > 0
 
     def test_class_attribute_modification(self):
         with pytest.raises(AttributeError):
-            gates.X.num_qubits = 0
+            gates.X.num_qreg = 0
 
         with pytest.raises(AttributeError):
             gates.X.is_clifford = False
@@ -713,9 +713,9 @@ class TestGateErrors:
             gates.RY.latex_str = "R_y"
 
         class H(Gate):
-            num_qubits = 1
+            num_qreg = 1
 
-            def get_qobj(dtype):
+            def compute_qobj(dtype):
                 pass
 
         assert H.name == "H"
@@ -723,9 +723,9 @@ class TestGateErrors:
 
         class H(Gate):
             name = "Hadamard"
-            num_qubits = 1
+            num_qreg = 1
 
-            def get_qobj(dtype):
+            def compute_qobj(dtype):
                 pass
 
         H.name = "Hadamard"
