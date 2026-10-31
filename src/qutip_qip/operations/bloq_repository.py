@@ -4,29 +4,17 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from qutip_qip.operations.bloq import BloqBuilder, Bloq
-from qutip_qip.operations.op import Op, ParametricOp
+from qutip_qip.operations.op import Op
 
-# The implementation of an Op (or ParametricOp) is just a function
+# The implementation of an Op is just a function
 # which takes a BloqBuilder instances and adds the relevant gates.
 BloqImpl = Callable[..., None]
 
 
-def _name_of(op: Op | type[ParametricOp]) -> str:
-    if isinstance(op, Op) or (isinstance(op, type) and issubclass(op, ParametricOp)):
+def _name_of(op: type[Op]) -> str:
+    if isinstance(op, type) and issubclass(op, Op):
         return op.name
-
-    if isinstance(op, ParametricOp):
-        raise TypeError(
-            f"Register the class {type(op).__name__}, not the value {op!r}."
-        )
-    raise TypeError(f"Expected an Op or a ParametricOp subclass, got {op!r}.")
-
-
-def _with_params(spec: type[ParametricOp], impl: BloqImpl) -> BloqImpl:
-    def bound(op: Op, builder: BloqBuilder) -> None:
-        impl(spec(*op.params), builder)
-
-    return bound
+    raise TypeError(f"Register the Op class, not a value, got {op!r}.")
 
 
 @dataclass(eq=False)
@@ -46,7 +34,7 @@ class BloqRepository:
 
     def register(
         self,
-        op: Op | type[ParametricOp],
+        op: Op | type[Op],
         impl: BloqImpl | None = None,
         replace: bool = False,
     ):
@@ -59,14 +47,10 @@ class BloqRepository:
                 f"{name!r} is already registered and replace argument is False."
             )
 
-        if isinstance(op, type) and issubclass(op, ParametricOp):
-            self._entries[name] = _with_params(op, impl)
-        else:
-            self._entries[name] = impl
-
+        self._entries[name] = impl
         return impl
 
-    def resolve(self, op: Op) -> Bloq | None:
+    def resolve(self, op: type[Op]) -> Bloq | None:
         impl = self._entries.get(op.name)
         if impl is None:
             return None
@@ -93,7 +77,7 @@ DEFAULT_REPOSITORY = BloqRepository()
 
 
 def register_op(
-    op: Op | type[ParametricOp],
+    op: type[Op],
     impl: BloqImpl | None = None,
     *,
     repository: BloqRepository = DEFAULT_REPOSITORY,

@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from uuid import uuid4
 
 from qutip_qip.operations.conditional import Cbz, Cbnz, ClassicalControlCheck, Label
-from qutip_qip.operations.op import Op, OpInstruction, ParametricOp
+from qutip_qip.operations.op import Op, OpInstruction
 from qutip_qip.typing import Int
 from qutip_qip.utils import check_limit
 
@@ -129,10 +129,7 @@ class BloqBuilder:
     def aux_creg(self) -> tuple[int, ...]:
         return tuple(range(self.num_creg, self.num_creg + self.num_aux_creg))
 
-    def add(self, op: Op | ParametricOp, qreg=(), creg=(), style: dict = None) -> None:
-        if isinstance(op, ParametricOp):
-            op = op.to_op()
-
+    def add(self, op: Op, qreg=(), creg=(), style: dict = None) -> None:
         # Type checking is handled internally within OpInstruction
         # We just check each element of qreg, creg are within the limit
         if isinstance(qreg, Int):
