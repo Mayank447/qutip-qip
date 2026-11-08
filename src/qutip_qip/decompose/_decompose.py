@@ -237,7 +237,6 @@ def _gate_FREDKIN(circ_instruction, temp_resolved):
     temp_resolved.add_global_phase(phase=pi / 8)
 
 
-# TODO add a test for this
 def _gate_TOFFOLI(circ_instruction, temp_resolved):
     half_pi = np.pi / 2
     quarter_pi = np.pi / 4
@@ -247,11 +246,7 @@ def _gate_TOFFOLI(circ_instruction, temp_resolved):
 
     temp_resolved.add_global_phase(phase=np.pi / 8)
     temp_resolved.add_gate(
-        RZ(half_pi),
-        targets=controls[1],
-    )
-    temp_resolved.add_gate(
-        RZ(quarter_pi),
+        RZ(quarter_pi, arg_label=r"\pi/4"),
         targets=controls[0],
     )
     temp_resolved.add_gate(CX, targets=controls[1], controls=controls[0])
