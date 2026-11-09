@@ -4,16 +4,11 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from qutip_qip.operations.bloq import BloqBuilder, Bloq
-from qutip_qip.operations.op import Op
+from qutip_qip.operations.op import Op, get_op_class
 
 # The implementation of an Op is just a function
 # which takes a BloqBuilder instances and adds the relevant gates.
 BloqImpl = Callable[..., None]
-
-
-def _key(op):
-    # A parametric op registers by family, MultiSWAP(3) and MultiSWAP(4) share one entry.
-    return type(op) if isinstance(op, Op) and op.is_parametric else op
 
 
 @dataclass(eq=False)
@@ -39,8 +34,8 @@ class BloqRepository:
         if impl is None:
             return lambda f: self.register(op, f, replace=replace)
 
-        key = _key(op)
-        if not isinstance(key, Op | type(Op)):
+        key = get_op_class(op)
+        if key is None:
             raise TypeError(f"Register the Op family, got {op!r}.")
 
         if key in self._entries.maps[0] and not replace:
@@ -52,7 +47,7 @@ class BloqRepository:
         return impl
 
     def resolve(self, op: Op | type[Op]) -> Bloq | None:
-        impl = self._entries.get(_key(op))
+        impl = self._entries.get(get_op_class(op))
         if impl is None:
             return None
 
@@ -74,7 +69,7 @@ class BloqRepository:
         return child_repository
 
     def __contains__(self, op: Op | type[Op]) -> bool:
-        return _key(op) in self._entries
+        return get_op_class(op) in self._entries
 
 
 DEFAULT_REPOSITORY = BloqRepository()

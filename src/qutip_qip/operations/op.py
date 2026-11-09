@@ -269,3 +269,11 @@ def op_factory(build):
         return made(*params) if params else made
 
     return factory
+
+
+def get_op_class(op: Op | type[Op]) -> Op | type[Op] | None:
+    if isinstance(op, type) and issubclass(op, Op) and op.is_parametric:
+        return op
+    if isinstance(op, Op):
+        return type(op) if op.is_parametric else op
+    return None
