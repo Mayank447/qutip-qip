@@ -5,7 +5,11 @@ individual gate classes.
 """
 
 import numpy as np
+
+from qutip_qip.operations import register_op
 from qutip_qip.operations.gates import (
+    H,
+    PHASE,
     RX,
     RY,
     RZ,
@@ -13,6 +17,7 @@ from qutip_qip.operations.gates import (
     ISWAP,
     SQRTSWAP,
     SQRTISWAP,
+    SQRTX,
     CZ,
     SWAP,
 )
@@ -57,29 +62,17 @@ _gate_SQRTSWAP = _gate_NOTIMPLEMENTED
 _gate_SQRTISWAP = _gate_NOTIMPLEMENTED
 
 
-def _gate_SQRTNOT(circ_instruction, temp_resolved):
-    targets = circ_instruction.targets
-
-    temp_resolved.add_global_phase(phase=np.pi / 4)
-    temp_resolved.add_gate(
-        RX(np.pi / 2),
-        targets=targets,
-    )
+@register_op(SQRTX)
+def _gate_SQRTNOT(op, bloq):
+    bloq.add_global_phase(phase=np.pi / 4)
+    bloq.add(RX(np.pi / 2), 0)
 
 
-def _gate_H(circ_instruction, temp_resolved):
-    half_pi = np.pi / 2
-    targets = circ_instruction.targets
-
-    temp_resolved.add_global_phase(phase=half_pi)
-    temp_resolved.add_gate(
-        RY(half_pi),
-        targets=targets,
-    )
-    temp_resolved.add_gate(
-        RX(np.pi),
-        targets=targets,
-    )
+@register_op(H)
+def _gate_H(op, bloq):
+    bloq.add_global_phase(phase=np.pi / 2)
+    bloq.add(RY(np.pi / 2), 0)
+    bloq.add(RX(np.pi), 0)
 
 
 _gate_SNOT = _gate_H
