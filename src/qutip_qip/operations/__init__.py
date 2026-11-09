@@ -9,7 +9,7 @@ from .utils import (
 )
 from .op import Op, OpInstruction, get_op_class
 from .unitary import AngleUnitary, Unitary, get_unitary_gate
-from .controlled import ControlledUnitary, controlled
+from .controlled import ControlledUnitary, Controlled
 from .measurement import Measurement, Mz
 from .bloq import Bloq, BloqBuilder
 from .bloq_repository import BloqRepository, register_op
@@ -54,7 +54,7 @@ __all__ = [
     "ControlledUnitary",
     "Unitary",
     "get_unitary_gate",
-    "controlled",
+    "Controlled",
     "AngleUnitary",
     "Measurement",
     "OpInstruction",

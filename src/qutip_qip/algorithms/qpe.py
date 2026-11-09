@@ -1,5 +1,5 @@
 from qutip_qip.algorithms.qft import QFT
-from qutip_qip.operations import Power, Unitary, controlled, register_op
+from qutip_qip.operations import Power, Unitary, Controlled, register_op
 from qutip_qip.operations.gates import H
 from qutip_qip.typing import Int
 
@@ -35,6 +35,6 @@ def _qpe(op, bloq):
         bloq.add(H, q)
 
     for j in range(t):
-        bloq.add(controlled(Power(op.unitary, 2 ** (t - 1 - j))), (j, *target))
+        bloq.add(Controlled(Power(op.unitary, 2 ** (t - 1 - j))), (j, *target))
 
     bloq.add(QFT(t).inverse(), tuple(range(t)))

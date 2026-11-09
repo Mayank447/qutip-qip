@@ -1,5 +1,5 @@
 import numpy as np
-from qutip_qip.operations import Unitary, controlled, register_op
+from qutip_qip.operations import Unitary, Controlled, register_op
 from qutip_qip.operations.gates import H, X, Z, CZ
 
 
@@ -18,7 +18,7 @@ def _phase_oracle(op, bloq):
     if op.n == 1:
         mcz = Z
     else:
-        mcz = controlled(Z, op.n - 1)
+        mcz = Controlled(Z, op.n - 1)
 
     for m in op.marked:
         zeros = [q for q in range(op.n) if not (m >> (op.n - 1 - q)) & 1]

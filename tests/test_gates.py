@@ -11,7 +11,7 @@ from qutip_qip.operations import (
     ControlledUnitary,
     Mz,
     Unitary,
-    controlled,
+    Controlled,
     expand_operator,
     get_unitary_gate,
     hadamard_transform,
@@ -261,7 +261,7 @@ class TestGateExpansion:
             assert _infidelity(test, expected) < 1e-12
 
     random_gate = get_unitary_gate("random", qutip.rand_unitary([2] * 1))
-    RandomThreeQubitGate = controlled(random_gate, 2)
+    RandomThreeQubitGate = Controlled(random_gate, 2)
 
     @pytest.mark.parametrize(
         ["gate", "n_controls"],
@@ -459,8 +459,8 @@ CONTROLLED_GATE = [
     gates.CQASMU(0.9, 0.22, 0.15),
     gates.TOFFOLI,
     gates.FREDKIN,
-    controlled(U1, 1, 1),
-    controlled(U2, 1, 1)(0.88),
+    Controlled(U1, 1, 1),
+    Controlled(U2, 1, 1)(0.88),
 ]
 
 
@@ -505,11 +505,11 @@ class TestInverse:
         assert pickle.loads(pickle.dumps(Udag)) == Udag
 
     def test_controlled_inverse_keeps_its_controls(self):
-        CUdag = controlled(U1).inverse()
-        assert CUdag == controlled(U1.inverse()) == Inverse(controlled(U1))
+        CUdag = Controlled(U1).inverse()
+        assert CUdag == Controlled(U1.inverse()) == Inverse(Controlled(U1))
         assert isinstance(CUdag, ControlledUnitary) and CUdag.num_ctrl_qreg == 1
         assert CUdag.name == "CU1dag"
-        assert CUdag.get_qobj() == controlled(U1).get_qobj().dag()
+        assert CUdag.get_qobj() == Controlled(U1).get_qobj().dag()
         assert gates.CT.inverse() is gates.CTdag
         assert gates.CRX(0.5).inverse() == gates.CRX(-0.5)
 
@@ -530,29 +530,29 @@ class TestInverse:
 
 class TestControlled:
     def test_factory_and_hand_written_classes_are_one_value(self):
-        assert controlled(gates.X) == gates.CX
-        assert hash(controlled(gates.X)) == hash(gates.CX)
-        assert controlled(gates.X, 2) == gates.TOFFOLI
-        assert controlled(gates.SWAP) == gates.FREDKIN
-        assert controlled(gates.RX)(0.5) == controlled(gates.RX(0.5)) == gates.CRX(0.5)
-        assert pickle.loads(pickle.dumps(controlled(gates.X, 2))) is controlled(
+        assert Controlled(gates.X) == gates.CX
+        assert hash(Controlled(gates.X)) == hash(gates.CX)
+        assert Controlled(gates.X, 2) == gates.TOFFOLI
+        assert Controlled(gates.SWAP) == gates.FREDKIN
+        assert Controlled(gates.RX)(0.5) == Controlled(gates.RX(0.5)) == gates.CRX(0.5)
+        assert pickle.loads(pickle.dumps(Controlled(gates.X, 2))) is Controlled(
             gates.X, 2
         )
-        assert pickle.loads(pickle.dumps(controlled(gates.RX)(0.5))) == gates.CRX(0.5)
+        assert pickle.loads(pickle.dumps(Controlled(gates.RX)(0.5))) == gates.CRX(0.5)
 
     def test_nested_controls_flatten(self):
-        assert controlled(gates.CX) == controlled(gates.X, 2) == gates.TOFFOLI
-        assert controlled(gates.CX).target is gates.X
-        nested = controlled(controlled(gates.X, ctrl_value=0))
-        assert nested == controlled(gates.X, 2, ctrl_value=0b10)
+        assert Controlled(gates.CX) == Controlled(gates.X, 2) == gates.TOFFOLI
+        assert Controlled(gates.CX).target is gates.X
+        nested = Controlled(Controlled(gates.X, ctrl_value=0))
+        assert nested == Controlled(gates.X, 2, ctrl_value=0b10)
 
     def test_registers_follow_the_target(self):
-        assert (controlled(gates.RX).num_qreg, controlled(gates.RX).qreg_dim) == (
+        assert (Controlled(gates.RX).num_qreg, Controlled(gates.RX).qreg_dim) == (
             2,
             (2, 2),
         )
-        assert controlled(gates.X, ctrl_dim=(3,)).qreg_dim == (3, 2)
-        assert controlled(gates.X).self_inverse and not controlled(gates.T).self_inverse
+        assert Controlled(gates.X, ctrl_dim=(3,)).qreg_dim == (3, 2)
+        assert Controlled(gates.X).self_inverse and not Controlled(gates.T).self_inverse
 
         class Identity(Unitary):
             n: int
@@ -561,7 +561,7 @@ class TestControlled:
             def compute_qobj(self, dtype="dense"):
                 return qutip.qeye([2] * self.n).to(dtype)
 
-        CI = controlled(Identity)(2)
+        CI = Controlled(Identity)(2)
         assert (CI.num_qreg, CI.qreg_dim) == (3, (2, 2, 2))
         assert CI.get_qobj() == qutip.qeye([2, 2, 2])
 
@@ -573,15 +573,15 @@ class TestControlled:
 
     def test_errors(self):
         with pytest.raises(TypeError):
-            controlled(Mz)  # only unitaries have controlled forms
+            Controlled(Mz)  # only unitaries have controlled forms
         with pytest.raises(ValueError):
-            controlled(gates.X, ctrl_dim=(2, 2))  # one control, two dimensions
+            Controlled(gates.X, ctrl_dim=(2, 2))  # one control, two dimensions
 
     def test_nested_value_keeps_its_parameters(self):
         class CCRXh(ControlledUnitary):
             target = gates.CRX(0.5)
 
-        assert CCRXh == controlled(gates.CRX(0.5))
+        assert CCRXh == Controlled(gates.CRX(0.5))
 
 
 class TestGateErrors:
@@ -707,10 +707,10 @@ class TestGateErrors:
 
         # Control_value > 2^n -1
         with pytest.raises(ValueError):
-            controlled(gates.X, num_ctrl_qreg=1, ctrl_value=2)
+            Controlled(gates.X, num_ctrl_qreg=1, ctrl_value=2)
 
         with pytest.raises(ValueError):
-            controlled(gates.X, num_ctrl_qreg=0)  # num_ctrl_qreg > 0
+            Controlled(gates.X, num_ctrl_qreg=0)  # num_ctrl_qreg > 0
 
     def test_class_attribute_modification(self):
         with pytest.raises(AttributeError):

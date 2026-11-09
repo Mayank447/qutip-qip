@@ -249,7 +249,7 @@ class OpInstruction:
 
 
 # In future if we want to pickle Ops or use the multiprocessing package
-# the Ops created via functions like get_unitary_gate, controlled won't
+# the Ops created via functions like get_unitary_gate, Controlled won't
 # reduce properly due to the import path issue. That's why we have to define op_factory.
 copyreg.pickle(_OpMeta, lambda cls: vars(cls).get("_factory") or cls.__qualname__)
 
@@ -257,13 +257,13 @@ copyreg.pickle(_OpMeta, lambda cls: vars(cls).get("_factory") or cls.__qualname_
 def op_factory(build):
     @wraps(build)
     def factory(*args, **kwargs):
-        # A value's parameters carry over: controlled(RX(0.5)) is controlled(RX)(0.5).
+        # A value's parameters carry over: Controlled(RX(0.5)) is Controlled(RX)(0.5).
         params = args[0].params if args and isinstance(args[0], Op) else ()
         if params:
             args = (type(args[0]), *args[1:])
         made = build(*args, **kwargs)
 
-        # A Op factory-made class (e.g. via controlled, get_unitary_gate etc.) has no import path, so it pickles as the call that made it.
+        # A Op factory-made class (e.g. via Controlled, get_unitary_gate etc.) has no import path, so it pickles as the call that made it.
         family = made if made.is_parametric else type(made)
         family._factory = (partial(factory, *args, **kwargs), ())
         return made(*params) if params else made

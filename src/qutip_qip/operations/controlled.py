@@ -188,7 +188,7 @@ class ControlledUnitary(Unitary):
         )
 
     def compute_inverse(self) -> Unitary:
-        return controlled(
+        return Controlled(
             self.target_unitary.inverse(),
             self.num_ctrl_qreg,
             self.ctrl_value,
@@ -200,7 +200,7 @@ class ControlledUnitary(Unitary):
 
 
 @op_factory
-def controlled(
+def Controlled(
     op: Unitary | type[Unitary],
     num_ctrl_qreg: int = 1,
     ctrl_value: int | None = None,
