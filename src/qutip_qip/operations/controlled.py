@@ -13,7 +13,7 @@ from scipy.linalg import block_diag
 
 from qutip import Qobj
 from qutip_qip.operations.op import op_factory
-from qutip_qip.operations.unitary import Unitary
+from qutip_qip.operations.unitary import Inverse, Unitary
 from qutip_qip.typing import Int
 
 
@@ -189,7 +189,7 @@ class ControlledUnitary(Unitary):
 
     def compute_inverse(self) -> Unitary:
         return Controlled(
-            self.target_unitary.inverse(),
+            Inverse(self.target_unitary),
             self.num_ctrl_qreg,
             self.ctrl_value,
             self.ctrl_dim,

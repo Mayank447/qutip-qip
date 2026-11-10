@@ -8,7 +8,7 @@ from .utils import (
     gate_sequence_product,
 )
 from .op import Op, OpInstruction, get_op_class
-from .unitary import AngleUnitary, Unitary, get_unitary_gate
+from .unitary import AngleUnitary, Inverse, Unitary, get_unitary_gate
 from .controlled import ControlledUnitary, Controlled
 from .measurement import Measurement, Mz
 from .bloq import Bloq, BloqBuilder
@@ -53,6 +53,7 @@ __all__ = [
     "Op",
     "ControlledUnitary",
     "Unitary",
+    "Inverse",
     "get_unitary_gate",
     "Controlled",
     "AngleUnitary",

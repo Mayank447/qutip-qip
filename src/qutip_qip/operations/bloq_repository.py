@@ -46,7 +46,7 @@ class BloqRepository:
         self._entries[key] = impl
         return impl
 
-    def resolve(self, op: Op | type[Op]) -> Bloq | None:
+    def to_bloq(self, op: Op | type[Op]) -> Bloq | None:
         impl = self._entries.get(get_op_class(op))
         if impl is None:
             return None

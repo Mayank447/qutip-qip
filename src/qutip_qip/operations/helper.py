@@ -1,8 +1,12 @@
 from qutip import Qobj
 
 from qutip_qip.operations.bloq_repository import register_op
-from qutip_qip.operations.unitary import Unitary, _from_op
+from qutip_qip.operations.unitary import Inverse, Unitary
 from qutip_qip.typing import Int
+
+
+def _from_op(attr: str) -> property:
+    return property(lambda self: getattr(self.op, attr))
 
 
 class Power(Unitary):
@@ -28,7 +32,7 @@ class Power(Unitary):
         return self.op.get_qobj(dtype) ** self.k
 
     def compute_inverse(self) -> Unitary:
-        return Power(self.op.inverse(), self.k)
+        return Power(Inverse(self.op), self.k)
 
     def __repr__(self) -> str:
         return f"{self.op!r}^{self.k}"

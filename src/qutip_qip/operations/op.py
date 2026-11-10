@@ -56,7 +56,11 @@ class _OpMeta(ABCMeta):
             raise TypeError(
                 f"{cls.__qualname__} is a value, not a parametric op, use it directly."
             )
-        return super().__call__(*args, **kwargs)
+
+        op = cls.__new__(cls, *args, **kwargs)
+        if type(op) is cls:
+            op.__init__(*args, **kwargs)
+        return op
 
     def __setattr__(cls, name, value):
         if not name.startswith("_") and "_sealed" in vars(cls):
