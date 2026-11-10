@@ -9,6 +9,7 @@ import qutip
 from qutip_qip.operations import (
     AngleUnitary,
     ControlledUnitary,
+    Inverse,
     Mz,
     Unitary,
     Controlled,
@@ -467,7 +468,7 @@ CONTROLLED_GATE = [
 @pytest.mark.parametrize("gate", GATES + PARAMETRIC_GATE + CONTROLLED_GATE)
 def test_gate_inverse(gate: Unitary | type[Unitary]):
     n = 1 << gate.num_qubits
-    inverse = gate.inverse()
+    inverse = Inverse(gate)
     np.testing.assert_allclose(
         (gate.get_qobj() * inverse.get_qobj()).full(),
         np.eye(n),
@@ -491,41 +492,30 @@ def test_gate_equality():
 
 class TestInverse:
     def test_closed_form_and_self_inverse(self):
-        assert gates.T.inverse() is Inverse(gates.T) is gates.Tdag
-        assert gates.X.inverse() is Inverse(gates.X) is gates.X
-        assert gates.RX(0.5).inverse() == Inverse(gates.RX(0.5)) == gates.RX(-0.5)
+        assert Inverse(gates.T) is gates.Tdag
+        assert Inverse(gates.X) is gates.X
+        assert Inverse(gates.RX(0.5)) == Inverse(gates.RX)(0.5) == gates.RX(-0.5)
 
     def test_wrapper_when_there_is_no_closed_form(self):
-        Udag = U1.inverse()
-        assert isinstance(Udag, Inverse) and Inverse(U1) == Udag
-        assert Udag.inverse() is Inverse(Udag) is U1  # U.inverse().inverse()
-        assert Udag.name == "U1dag" and Udag.is_clifford is False
+        Udag = Inverse(U1)
+        assert Inverse(Udag) is U1  # U.inverse().inverse()
+        assert Udag.name == "U1dag"
         assert (Udag.num_qreg, Udag.qreg_dim) == (1, (2,))
         assert Udag.get_qobj() == U1.get_qobj().dag()
+        assert isinstance(Udag, Inverse)
         assert pickle.loads(pickle.dumps(Udag)) == Udag
 
     def test_controlled_inverse_keeps_its_controls(self):
-        CUdag = Controlled(U1).inverse()
-        assert CUdag == Controlled(U1.inverse()) == Inverse(Controlled(U1))
+        CUdag = Inverse(Controlled(U1))
+        assert CUdag == Controlled(Inverse(U1))
         assert isinstance(CUdag, ControlledUnitary) and CUdag.num_ctrl_qreg == 1
         assert CUdag.name == "CU1dag"
         assert CUdag.get_qobj() == Controlled(U1).get_qobj().dag()
-        assert gates.CT.inverse() is gates.CTdag
-        assert gates.CRX(0.5).inverse() == gates.CRX(-0.5)
+        assert Inverse(gates.CT) is gates.CTdag
 
     def test_errors(self):
         with pytest.raises(TypeError):
-            gates.RX.inverse()  # RX(0.5).inverse is valid
-
-        with pytest.raises(TypeError):
             Inverse(Mz)  # non-unitary
-
-        with pytest.raises(TypeError):
-
-            class OverridesInverse(Unitary):
-                num_qreg = 1
-
-                def inverse(self): ...  # the method to overwrite is compute_inverse
 
 
 class TestControlled:
