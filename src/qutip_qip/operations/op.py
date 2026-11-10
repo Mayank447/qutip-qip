@@ -253,7 +253,7 @@ class OpInstruction:
 
 
 # In future if we want to pickle Ops or use the multiprocessing package
-# the Ops created via functions like get_unitary_gate, Controlled won't
+# the Ops created via functions like get_unitary_gate, Controlled(..) won't
 # reduce properly due to the import path issue. That's why we have to define op_factory.
 copyreg.pickle(_OpMeta, lambda cls: vars(cls).get("_factory") or cls.__qualname__)
 

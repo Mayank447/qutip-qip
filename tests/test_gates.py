@@ -8,7 +8,7 @@ import qutip
 
 from qutip_qip.operations import (
     AngleUnitary,
-    ControlledUnitary,
+    Controlled,
     Inverse,
     Mz,
     Unitary,
@@ -508,7 +508,7 @@ class TestInverse:
     def test_controlled_inverse_keeps_its_controls(self):
         CUdag = Inverse(Controlled(U1))
         assert CUdag == Controlled(Inverse(U1))
-        assert isinstance(CUdag, ControlledUnitary) and CUdag.num_ctrl_qreg == 1
+        assert isinstance(CUdag, Controlled) and CUdag.num_ctrl_qreg == 1
         assert CUdag.name == "CU1dag"
         assert CUdag.get_qobj() == Controlled(U1).get_qobj().dag()
         assert Inverse(gates.CT) is gates.CTdag
@@ -520,9 +520,13 @@ class TestInverse:
 
 class TestControlled:
     def test_factory_and_hand_written_classes_are_one_value(self):
+        assert Controlled(gates.X) is gates.CX
+        assert Controlled(gates.RX) is gates.CRX
+        assert Controlled(gates.RX(0.5)) == gates.CRX(0.5)
+
         assert Controlled(gates.X) == gates.CX
         assert hash(Controlled(gates.X)) == hash(gates.CX)
-        assert Controlled(gates.X, 2) == gates.TOFFOLI
+        assert Controlled(gates.X, 2) == Controlled(gates.CX) == gates.TOFFOLI
         assert Controlled(gates.SWAP) == gates.FREDKIN
         assert Controlled(gates.RX)(0.5) == Controlled(gates.RX(0.5)) == gates.CRX(0.5)
         assert pickle.loads(pickle.dumps(Controlled(gates.X, 2))) is Controlled(
@@ -568,7 +572,7 @@ class TestControlled:
             Controlled(gates.X, ctrl_dim=(2, 2))  # one control, two dimensions
 
     def test_nested_value_keeps_its_parameters(self):
-        class CCRXh(ControlledUnitary):
+        class CCRXh(Controlled):
             target = gates.CRX(0.5)
 
         assert CCRXh == Controlled(gates.CRX(0.5))
@@ -635,21 +639,21 @@ class TestGateErrors:
     def test_controlled_gate_errors(self):
         with pytest.raises(ValueError):
 
-            class BadCtrlGate(ControlledUnitary):
+            class BadCtrlGate(Controlled):
                 target = gates.X
                 num_ctrl_qreg = -1  # Can't be negative
                 ctrl_value = 1
 
         with pytest.raises(ValueError):
 
-            class BadCtrlGate2(ControlledUnitary):
+            class BadCtrlGate2(Controlled):
                 target = gates.X
                 num_ctrl_qreg = 1
                 ctrl_value = 1.5  # Control value must be an int
 
         with pytest.raises(ValueError):
 
-            class BadCtrlGate3(ControlledUnitary):
+            class BadCtrlGate3(Controlled):
                 target = gates.X
                 num_ctrl_qreg = 1
                 ctrl_value = 2  # Control value can't be greater than 1 in this case
