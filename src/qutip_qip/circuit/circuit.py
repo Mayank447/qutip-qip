@@ -33,7 +33,7 @@ from qutip_qip.operations import (
     get_unitary_gate,
 )
 from qutip_qip.operations import gates as std
-from qutip_qip.typing import IntSequence
+from qutip_qip.typing import Int, IntSequence
 from qutip_qip.utils import convert_type_input_to_sequence
 
 try:
@@ -87,7 +87,7 @@ class QuantumCircuit:
             )
             num_qubits = N
 
-        self.dims = dims if dims is not None else (2,) * num_qubits
+        self.dims = dims if dims is not None else [2] * num_qubits
         self._builder = BloqBuilder(num_qubits, num_cbits, qreg_dim=self.dims)
 
         self.reverse_states = reverse_states
@@ -283,7 +283,7 @@ class QuantumCircuit:
         Converts _ops list to a frozen _instructions tuple.
         """
         self._instructions = []
-        bloq = self._builder.build()
+        bloq = self._builder.to_bloq()
 
         for op_instruction in bloq.instructions:
             op = op_instruction.op
@@ -490,6 +490,26 @@ class QuantumCircuit:
         classical_controls = convert_type_input_to_sequence(
             int, "classical_controls", classical_controls
         )
+
+        # Check for classical control
+        default_classical_ctrl_val = 2 ** (len(classical_controls)) - 1
+
+        if classical_control_value is None:
+            if len(classical_controls) > 0:
+                classical_control_value = default_classical_ctrl_val
+
+        elif not isinstance(classical_control_value, Int):
+            raise TypeError(
+                f"classical_control_value must be an integer or None, got {classical_control_value}"
+            )
+
+        elif (
+            classical_control_value < 0
+            or classical_control_value > default_classical_ctrl_val
+        ):
+            raise ValueError(
+                f"{classical_control_value} must be with [0, {default_classical_ctrl_val}]"
+            )
 
         qubits = []
         qubits.extend(controls)
@@ -1026,3 +1046,4 @@ class QubitCircuit(QuantumCircuit):
             DeprecationWarning,
             stacklevel=2,
         )
+        super().__init__(*args, **kwargs)

@@ -67,6 +67,10 @@ class BloqBuilder:
         self._op_instructions: list[OpInstruction] = []
 
     @property
+    def qreg_dim(self) -> tuple[int, ...]:
+        return self._qreg_dim
+
+    @property
     def num_qreg(self) -> int:
         return len(self._qreg_dim)
 
@@ -240,7 +244,7 @@ class BloqBuilder:
         finally:
             self.add(label)
 
-    def build(self) -> Bloq:
+    def to_bloq(self) -> Bloq:
         return Bloq(
             qreg_dim=self._qreg_dim,
             aux_qreg_dim=tuple(self._aux_qreg_dim),

@@ -46,7 +46,7 @@ class BloqRepository:
         self._entries[key] = impl
         return impl
 
-    def to_bloq(self, op: Op | type[Op]) -> Bloq | None:
+    def resolve(self, op: Op | type[Op]) -> Bloq | None:
         impl = self._entries.get(get_op_class(op))
         if impl is None:
             return None
@@ -54,7 +54,7 @@ class BloqRepository:
         # Constructing the bloq for the given params
         builder = BloqBuilder(op.num_qreg, op.num_creg, op.qreg_dim)
         impl(op, builder)
-        return builder.build()
+        return builder.to_bloq()
 
     def scope(self) -> BloqRepository:
         """
