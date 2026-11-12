@@ -76,6 +76,7 @@ class QuantumCircuit(BloqBuilder):
         output_states=None,
         reverse_states=True,
     ):
+        self._builder = BloqBuilder(num_qreg, num_creg, qreg_dim)
         self.reverse_states = reverse_states
         self._instructions: list[CircuitInstruction] = []
         self._built_count = -1
@@ -83,12 +84,12 @@ class QuantumCircuit(BloqBuilder):
         if input_states:
             self.input_states = input_states
         else:
-            self.input_states = [None for i in range(self.num_qreg + num_creg)]
+            self.input_states = [None for i in range(num_qreg + num_creg)]
 
         if output_states:
             self.output_states = output_states
         else:
-            self.output_states = [None for i in range(self.num_qreg + num_creg)]
+            self.output_states = [None for i in range(num_qreg + num_creg)]
 
         super().__init__(num_qreg, num_creg, qreg_dim)
 
@@ -690,7 +691,6 @@ class QubitCircuit(QuantumCircuit):
             num_qubits = N
 
         self.dims = dims if dims is not None else [2] * num_qubits
-        self._builder = BloqBuilder(num_qubits, num_cbits, qreg_dim=self.dims)
 
         self.reverse_states = reverse_states
         self._instructions: list[CircuitInstruction] = []
@@ -699,12 +699,12 @@ class QubitCircuit(QuantumCircuit):
         if input_states:
             self.input_states = input_states
         else:
-            self.input_states = [None for i in range(self.num_qreg + num_cbits)]
+            self.input_states = [None for i in range(num_qubits + num_cbits)]
 
         if output_states:
             self.output_states = output_states
         else:
-            self.output_states = [None for i in range(self.num_qreg + num_cbits)]
+            self.output_states = [None for i in range(num_qubits + num_cbits)]
 
         if user_gates is not None:
             self.user_gates = user_gates
@@ -712,7 +712,7 @@ class QubitCircuit(QuantumCircuit):
         super().__init__(
             num_qubits,
             num_cbits,
-            dims,
+            self.dims,
             input_states,
             output_states,
             reverse_states,

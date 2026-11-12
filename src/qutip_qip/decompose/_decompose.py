@@ -246,7 +246,7 @@ def _gate_TOFFOLI(circ_instruction, temp_resolved):
 
     temp_resolved.add_global_phase(phase=np.pi / 8)
     temp_resolved.add_gate(
-        RZ(quarter_pi, arg_label=r"\pi/4"),
+        RZ(quarter_pi),
         targets=controls[0],
     )
     temp_resolved.add_gate(CX, targets=controls[1], controls=controls[0])
