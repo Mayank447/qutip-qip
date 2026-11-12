@@ -192,7 +192,7 @@ class Controlled(Unitary):
             dtype=dtype,
         )
 
-    def compute_inverse(self) -> Unitary:
+    def inverse(self) -> Unitary:
         return Controlled(
             Inverse(self.target_unitary),
             self.num_ctrl_qreg,

@@ -33,9 +33,9 @@ class Unitary(Op):
             if not isinstance(inspect.getattr_static(cls, attr), bool | property):
                 raise TypeError(f"{cls.name}: {attr} must be a bool.")
 
-        if cls.self_inverse is True and "compute_inverse" in vars(cls):
+        if cls.self_inverse is True and "inverse" in vars(cls):
             raise TypeError(
-                f"{cls.name} is self_inverse, so it must not define compute_inverse."
+                f"{cls.name} is self_inverse, so it must not define inverse."
             )
 
     @cached_method
@@ -46,7 +46,7 @@ class Unitary(Op):
         """The op's matrix. Any op may define one, from X to QFT(n); the default is to have none."""
         raise NotImplementedError(f"{self.name} has no matrix, decompose it instead.")
 
-    def compute_inverse(self) -> "Unitary | None":
+    def inverse(self) -> "Unitary | None":
         """Ops with a closed form should overwrite this."""
         return self if self.self_inverse else None
 
@@ -110,9 +110,7 @@ class Inverse(Unitary):
             return _inverse(*args, **kwargs)
 
         # A family called with its parameters e.g. Inverse(RX)(0.5) is RX(-0.5) i.e. its the closed form.
-        closed = (
-            cls.target(*args, **kwargs).compute_inverse() if cls.is_parametric else None
-        )
+        closed = cls.target(*args, **kwargs).inverse() if cls.is_parametric else None
         return super().__new__(cls) if closed is None else closed
 
     @cached_property
@@ -126,7 +124,7 @@ class Inverse(Unitary):
     def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return self.target_unitary.get_qobj(dtype).dag()
 
-    def compute_inverse(self) -> Unitary:
+    def inverse(self) -> Unitary:
         return self.target_unitary
 
     def __repr__(self) -> str:
@@ -135,7 +133,7 @@ class Inverse(Unitary):
 
 def _inverse(op: Unitary | type[Unitary]) -> Unitary | type[Unitary]:
     """What Inverse(op) returns."""
-    if isinstance(op, Unitary) and (closed := op.compute_inverse()) is not None:
+    if isinstance(op, Unitary) and (closed := op.inverse()) is not None:
         return closed  # Inverse(T) is Tdag
     if isinstance(op, type) and issubclass(op, Inverse) and op is not Inverse:
         return op.target  # Inverse(Inverse(QFT)) is QFT

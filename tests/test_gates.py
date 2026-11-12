@@ -408,7 +408,7 @@ class U2(AngleUnitary):
             dtype=dtype,
         )
 
-    def compute_inverse(self):
+    def inverse(self):
         return U2(-self.theta)
 
 

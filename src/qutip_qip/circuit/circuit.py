@@ -87,7 +87,7 @@ class QubitCircuit:
             )
             num_qubits = N
 
-        self.dims = dims if dims is not None else [2] * num_qubits
+        self.dims = dims if dims is not None else (2,) * num_qubits
         self._builder = BloqBuilder(num_qubits, num_cbits, qreg_dim=self.dims)
 
         self.reverse_states = reverse_states
@@ -132,9 +132,6 @@ class QubitCircuit:
             stacklevel=2,
         )
         return self.num_qubits
-
-    def __repr__(self) -> str:
-        return ""
 
     @property
     def global_phase(self):
@@ -210,7 +207,6 @@ class QubitCircuit:
                 return get_qobj
 
             class _OldUserParametricGate(AngleUnitary):
-                __slots__ = ()
                 name = gate_name
                 num_qreg = _num_qreg
                 __annotations__ = {f"arg{i}": float for i in range(_num_params)}
@@ -497,41 +493,6 @@ class QubitCircuit:
         classical_controls = convert_type_input_to_sequence(
             int, "classical_controls", classical_controls
         )
-
-        # Checks each element within the limit
-        check_limit("targets", targets, 0, self.num_qubits - 1)
-        check_limit("controls", controls, 0, self.num_qubits - 1)
-        check_limit("classical_controls", classical_controls, 0, self.num_cbits - 1)
-
-        if gate.is_controlled and len(controls) != gate.num_ctrl_qreg:
-            raise ValueError(
-                f"{gate.name} takes {gate.num_ctrl_qreg} qreg, but {len(controls)} were provided."
-            )
-
-        if len(controls) + len(targets) != gate.num_qreg:
-            raise ValueError(
-                f"{gate.name} takes {gate.num_qreg} qreg, but {len(controls) + len(targets)} were provided."
-            )
-
-        # Check for classical control
-        default_classical_ctrl_val = 2 ** (len(classical_controls)) - 1
-
-        if classical_control_value is None:
-            if len(classical_controls) > 0:
-                classical_control_value = default_classical_ctrl_val
-
-        elif not isinstance(classical_control_value, Int):
-            raise TypeError(
-                f"classical_control_value must be an integer or None, got {classical_control_value}"
-            )
-
-        elif (
-            classical_control_value < 0
-            or classical_control_value > default_classical_ctrl_val
-        ):
-            raise ValueError(
-                f"{classical_control_value} must be with [0, {default_classical_ctrl_val}]"
-            )
 
         qubits = []
         qubits.extend(controls)

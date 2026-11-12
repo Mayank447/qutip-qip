@@ -91,7 +91,7 @@ class ISWAP(Unitary):
         )
 
     @staticmethod
-    def compute_inverse() -> type[Unitary]:
+    def inverse() -> type[Unitary]:
         return ISWAPdag
 
 
@@ -129,7 +129,7 @@ class ISWAPdag(Unitary):
         )
 
     @staticmethod
-    def compute_inverse() -> type[Unitary]:
+    def inverse() -> type[Unitary]:
         return ISWAP
 
 
@@ -189,7 +189,7 @@ class SQRTSWAP(Unitary):
         )
 
     @staticmethod
-    def compute_inverse() -> type[Unitary]:
+    def inverse() -> type[Unitary]:
         return SQRTSWAPdag
 
 
@@ -228,7 +228,7 @@ class SQRTSWAPdag(Unitary):
         )
 
     @staticmethod
-    def compute_inverse() -> type[Unitary]:
+    def inverse() -> type[Unitary]:
         return SQRTSWAP
 
 
@@ -276,7 +276,7 @@ class SQRTISWAP(Unitary):
         )
 
     @staticmethod
-    def compute_inverse() -> type[Unitary]:
+    def inverse() -> type[Unitary]:
         return SQRTISWAPdag
 
 
@@ -316,7 +316,7 @@ class SQRTISWAPdag(Unitary):
         )
 
     @staticmethod
-    def compute_inverse() -> type[Unitary]:
+    def inverse() -> type[Unitary]:
         return SQRTISWAP
 
 
@@ -371,7 +371,7 @@ class BERKELEY(Unitary):
         )
 
     @staticmethod
-    def compute_inverse() -> type[Unitary]:
+    def inverse() -> type[Unitary]:
         return BERKELEYdag
 
 
@@ -417,7 +417,7 @@ class BERKELEYdag(Unitary):
         )
 
     @staticmethod
-    def compute_inverse() -> type[Unitary]:
+    def inverse() -> type[Unitary]:
         return BERKELEY
 
 
@@ -487,7 +487,7 @@ class SWAPALPHA(AngleUnitary):
             dtype=dtype,
         )
 
-    def compute_inverse(self) -> Unitary:
+    def inverse(self) -> Unitary:
         return SWAPALPHA(-self.alpha)
 
 
@@ -558,7 +558,7 @@ class MS(AngleUnitary):
             dtype=dtype,
         )
 
-    def compute_inverse(self) -> Unitary:
+    def inverse(self) -> Unitary:
         return MS(-self.theta, self.phi)
 
 
@@ -620,7 +620,7 @@ class RZX(AngleUnitary):
             dtype=dtype,
         )
 
-    def compute_inverse(self) -> Unitary:
+    def inverse(self) -> Unitary:
         return RZX(-self.theta)
 
 
@@ -802,7 +802,7 @@ class CT(Controlled):
         )
 
     @staticmethod
-    def compute_inverse() -> type[Unitary]:
+    def inverse() -> type[Unitary]:
         return CTdag
 
 
@@ -848,7 +848,7 @@ class CTdag(Controlled):
         )
 
     @staticmethod
-    def compute_inverse() -> type[Unitary]:
+    def inverse() -> type[Unitary]:
         return CT
 
 
@@ -889,7 +889,7 @@ class CS(Controlled):
         )
 
     @staticmethod
-    def compute_inverse() -> type[Unitary]:
+    def inverse() -> type[Unitary]:
         return CSdag
 
 
@@ -930,7 +930,7 @@ class CSdag(Controlled):
         )
 
     @staticmethod
-    def compute_inverse() -> type[Unitary]:
+    def inverse() -> type[Unitary]:
         return CS
 
 
@@ -972,7 +972,7 @@ class CRX(Controlled):
             dtype=dtype,
         )
 
-    def compute_inverse(self) -> Unitary:
+    def inverse(self) -> Unitary:
         return CRX(-self.theta)
 
 
@@ -1014,7 +1014,7 @@ class CRY(Controlled):
             dtype=dtype,
         )
 
-    def compute_inverse(self) -> Unitary:
+    def inverse(self) -> Unitary:
         return CRY(-self.theta)
 
 
@@ -1056,7 +1056,7 @@ class CRZ(Controlled):
             dtype=dtype,
         )
 
-    def compute_inverse(self) -> Unitary:
+    def inverse(self) -> Unitary:
         return CRZ(-self.theta)
 
 
@@ -1110,7 +1110,7 @@ class CPHASE(Controlled):
             dtype=dtype,
         )
 
-    def compute_inverse(self) -> Unitary:
+    def inverse(self) -> Unitary:
         return CPHASE(-self.theta)
 
 
@@ -1173,5 +1173,5 @@ class CQASMU(Controlled):
             dtype=dtype,
         )
 
-    def compute_inverse(self) -> Unitary:
+    def inverse(self) -> Unitary:
         return CQASMU(-self.theta, -self.gamma, -self.phi)

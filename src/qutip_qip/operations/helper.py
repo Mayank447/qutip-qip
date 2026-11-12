@@ -31,7 +31,7 @@ class Power(Unitary):
     def compute_qobj(self, dtype: str = "dense") -> Qobj:
         return self.op.get_qobj(dtype) ** self.k
 
-    def compute_inverse(self) -> Unitary:
+    def inverse(self) -> Unitary:
         return Power(Inverse(self.op), self.k)
 
     def __repr__(self) -> str:
