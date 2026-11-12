@@ -33,8 +33,8 @@ from qutip_qip.operations import (
     get_unitary_gate,
 )
 from qutip_qip.operations import gates as std
-from qutip_qip.typing import Int, IntSequence
-from qutip_qip.utils import check_limit, convert_type_input_to_sequence
+from qutip_qip.typing import IntSequence
+from qutip_qip.utils import convert_type_input_to_sequence
 
 try:
     from IPython.display import Image as DisplayImage, SVG as DisplaySVG
@@ -48,7 +48,7 @@ except ImportError:
         return data
 
 
-class QubitCircuit:
+class QuantumCircuit:
     """
     Representation of a quantum program/algorithm, maintaining a sequence
     of gates.
@@ -366,9 +366,6 @@ class QubitCircuit:
         classical_store = convert_type_input_to_sequence(
             int, "classical_store", classical_store
         )
-
-        check_limit("targets", targets, 0, self.num_qubits - 1)
-        check_limit("classical_store", classical_store, 0, self.num_cbits - 1)
 
         self.add(
             op=measurement,
@@ -1020,3 +1017,12 @@ class QubitCircuit:
 
         for circ_instruction in self.instructions:
             circ_instruction.to_qasm(qasm_out)
+
+
+class QubitCircuit(QuantumCircuit):
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "QubitCircuit has been renamed to QuantumCircuit",
+            DeprecationWarning,
+            stacklevel=2,
+        )
