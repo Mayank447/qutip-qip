@@ -48,7 +48,7 @@ except ImportError:
         return data
 
 
-class QuantumCircuit:
+class QuantumCircuit(BloqBuilder):
     """
     Representation of a quantum program/algorithm, maintaining a sequence
     of gates.
@@ -69,27 +69,13 @@ class QuantumCircuit:
 
     def __init__(
         self,
-        num_qubits=None,
+        num_qreg: int,
+        num_creg: int = 0,
+        qreg_dim: tuple[int, ...] = (),
         input_states=None,
         output_states=None,
         reverse_states=True,
-        dims=None,
-        num_cbits=0,
-        user_gates=None,
-        N=None,
     ):
-        # number of qubits in the register
-        if N is not None:
-            warnings.warn(
-                "The 'N' parameter is deprecated. Please use 'num_qubits' instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            num_qubits = N
-
-        self.dims = dims if dims is not None else [2] * num_qubits
-        self._builder = BloqBuilder(num_qubits, num_cbits, qreg_dim=self.dims)
-
         self.reverse_states = reverse_states
         self._instructions: list[CircuitInstruction] = []
         self._built_count = -1
@@ -97,41 +83,14 @@ class QuantumCircuit:
         if input_states:
             self.input_states = input_states
         else:
-            self.input_states = [None for i in range(self.num_qubits + num_cbits)]
+            self.input_states = [None for i in range(self.num_qreg + num_creg)]
 
         if output_states:
             self.output_states = output_states
         else:
-            self.output_states = [None for i in range(self.num_qubits + num_cbits)]
+            self.output_states = [None for i in range(self.num_qreg + num_creg)]
 
-        if user_gates is not None:
-            self.user_gates = user_gates
-
-    @property
-    def num_qubits(self) -> int:
-        """
-        Number of qubits in the circuit.
-        """
-        return self._builder.num_qreg
-
-    @property
-    def num_cbits(self) -> int:
-        """
-        Number of cbits in the circuit.
-        """
-        return self._builder.num_creg
-
-    @property
-    def N(self) -> int:
-        """
-        Number of qubits in the circuit.
-        """
-        warnings.warn(
-            "The 'N' parameter is deprecated. Please use 'num_qubits' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.num_qubits
+        super().__init__(num_qreg, num_creg, qreg_dim)
 
     @property
     def global_phase(self):
@@ -139,83 +98,6 @@ class QuantumCircuit:
 
     def add_global_phase(self, phase: float):
         self._builder.add_global_phase(phase)
-
-    @property
-    def gates(self) -> list[CircuitInstruction]:
-        warnings.warn(
-            "QubitCircuit.gates has been replaced with QubitCircuit.instructions",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.instructions
-
-    @gates.setter
-    def gates(self, value: any) -> None:
-        raise AttributeError(
-            "QubitCircuit.gates has been replaced with QubitCircuit.instructions",
-        )
-
-    @property
-    def user_gates(self) -> dict[str, type[Unitary]]:
-        return getattr(self, "_user_gates", {})
-
-    @user_gates.setter
-    def user_gates(self, value) -> None:
-        warnings.warn(
-            "Using circuit.user_gates with string gate names "
-            "is deprecated. Please define custom gates as "
-            "Gate classes instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.__dict__["user_gates"] = value
-
-        gate_classes = {}
-        for gate_name, user_gate_callable in value.items():
-            parameters = tuple(
-                inspect.signature(user_gate_callable).parameters.values()
-            )
-            num_params = len(parameters)
-
-            if num_params == 0:
-                # Non parametric gate
-                unitary = user_gate_callable()
-                gate_classes[gate_name] = get_unitary_gate(gate_name, unitary)
-                continue
-
-            # Parametric gate.
-            # We don't know the dimension of the unitary, need a try-run.
-            sample_arg_value = tuple(
-                (
-                    parameter.default
-                    if parameter.default is not inspect.Parameter.empty
-                    else 0
-                )
-                for parameter in parameters
-            )
-            sample_unitary = user_gate_callable(*sample_arg_value)
-            _num_qreg = int(np.log2(sample_unitary.shape[0]))
-            _num_params = num_params
-
-            # Without it, if you write get_qobj directly in the loop and reference
-            # user_gate_callable, all generated classes can end up using the last callable
-            # from the loop (late binding).
-            def _make_get_qobj(_user_gate_callable):
-                def get_qobj(self, dtype="dense"):
-                    return _user_gate_callable(*self.arg_value).to(dtype)
-
-                return get_qobj
-
-            class _OldUserParametricGate(AngleUnitary):
-                name = gate_name
-                num_qreg = _num_qreg
-                __annotations__ = {f"arg{i}": float for i in range(_num_params)}
-
-                compute_qobj = _make_get_qobj(user_gate_callable)
-
-            gate_classes[gate_name] = _OldUserParametricGate
-
-        self._user_gates = gate_classes
 
     @property
     def ops(self) -> tuple[OpInstruction, ...]:
@@ -321,206 +203,6 @@ class QuantumCircuit:
         self._instructions = tuple(self._instructions)
         self._built_count = len(self._builder._op_instructions)
 
-    def add_measurement(
-        self,
-        measurement: Type[Measurement],
-        targets: int | IntSequence,
-        classical_store: int | IntSequence,
-        index: None = None,
-    ):
-        """
-        Adds a measurement with specified parameters to the circuit.
-
-        Parameters
-        ----------
-        measurement : :class:`.Measurement`
-            `Measurement` subclasses
-        targets : int or Sequence of int
-            Gate targets
-        classical_store : int or Sequence of int
-            Classical register where result of measurement is stored.
-        index : list
-            Positions to add the gate.
-        """
-        if index is not None:
-            warnings.warn(
-                "The 'index' argument to 'add_measurement' is no longer supported and will "
-                "be ignored. Passing 'index' will be removed in a future version.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-        if isinstance(measurement, str):
-            warnings.warn(
-                "Passing a string name to add_measurement has been removed. "
-                "Defaulting to measurement in the Z- basis.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            measurement = Mz
-
-        if targets is None or classical_store is None:
-            raise ValueError("'targets' and 'classical_store' must not be None")
-
-        targets = convert_type_input_to_sequence(int, "targets", targets)
-        classical_store = convert_type_input_to_sequence(
-            int, "classical_store", classical_store
-        )
-
-        self.add(
-            op=measurement,
-            qreg=tuple(targets),
-            creg=tuple(classical_store),
-        )
-
-    def add_gate(
-        self,
-        gate: Unitary | str,
-        targets: int | IntSequence = (),
-        controls: int | IntSequence = (),
-        classical_controls: int | IntSequence = (),
-        classical_control_value: int | None = None,
-        style: dict = None,
-        arg_value: None = None,
-        arg_label: None = None,
-        control_value: None = None,
-        index: None = None,
-    ):
-        """
-        Adds a gate with specified parameters to the circuit.
-
-        Parameters
-        ----------
-        gate: :class:`~.operations.Gate` or :obj:`~.operations.Gate` or str
-            Gate name. If gate is an instance of :class:`~.operations.Gate`,
-            parameters are unpacked and added.
-        targets: int or list, optional
-            Index for the target qubits.
-        controls: int or list, optional
-            Indices for the (quantum) control qubits.
-        arg_value: Any, optional
-            Arguments for the gate. It will be used when generating the
-            unitary matrix. For predefined gates, they are used when
-            calling the ``get_compact_qobj`` methods of a gate.
-        arg_label: string, optional
-            Label for gate representation.
-        classical_controls : int or list of int, optional
-            Indices of classical bits to control the gate.
-        control_value : optional
-            Value of classical bits to control on, the classical controls are
-            interpreted as an integer with the lowest bit being the first one.
-            If not specified, then the value is interpreted to be
-            2 ** len(classical_controls) - 1
-            (i.e. all classical controls are 1).
-        style:
-            For circuit draw
-        """
-        # Deprecation warnings
-        if index is not None:
-            warnings.warn(
-                "The 'index' argument to 'add_measurement' is no longer supported and will "
-                "be ignored. Gates are appended to the end of the circuit. "
-                "Passing 'index' will be removed in a future version.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-        if arg_value is not None or arg_label is not None:
-            warnings.warn(
-                "Define 'arg_value', 'arg_label' in your Gate object e.g. RX(np.pi)"
-                ", 'arg_value', 'arg_label' arguments will be removed from 'add_gate' method in the future version.\n"
-                "Please refer to the tutorial for the recommended way to define them:\n"
-                "https://nbviewer.org/urls/qutip.org/qutip-tutorials/tutorials-v5/quantum-circuits/quantum-gates.ipynb",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-        if control_value is not None:
-            warnings.warn(
-                "'control_value' is no longer a valid argument and has been deprecated and will be removed in the future version.\n"
-                "from qutip_qip.operations import controlled\n"
-                "from qutip_qip.operations.gates import X\n"
-                "Example: gate = controlled(X, num_ctrl_qreg=1, ctrl_value=0)\n"
-                "Please refer to the tutorial for the recommended way to define them:\n"
-                "https://nbviewer.org/urls/qutip.org/qutip-tutorials/tutorials-v5/quantum-circuits/quantum-gates.ipynb",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-        if isinstance(gate, std.GLOBALPHASE):
-            self.add_global_phase(gate.arg_value[0])
-            return
-
-        # This conditional block can be remove if the gate input is only
-        # restricted to Gate subclasses or object instead of strings in the future.
-        if not isinstance(gate, Unitary):
-            if type(gate) is str:
-                if gate in std.GATE_CLASS_MAP:
-                    warnings.warn(
-                        "Passing Gate as a string input has been deprecated and will be removed in future versions.",
-                        DeprecationWarning,
-                        stacklevel=2,
-                    )
-                    gate_class = std.GATE_CLASS_MAP[gate]
-
-                elif gate in self.user_gates:
-                    gate_class = self.user_gates[gate]
-                else:
-                    raise ValueError(
-                        f"Gate '{gate}' is not a recognized standard gate or user-defined gate."
-                    )
-
-            else:
-                raise TypeError(
-                    "gate must be of a Gate object or a string ",
-                    f"got {gate} instead.",
-                )
-
-            if gate_class.is_parametric:
-                if isinstance(arg_value, (tuple, list, np.ndarray)):
-                    gate = gate_class(*arg_value)
-                else:
-                    gate = gate_class(arg_value)
-            else:
-                gate = gate_class
-
-        # Handling case for integer input
-        targets = convert_type_input_to_sequence(int, "targets", targets)
-        controls = convert_type_input_to_sequence(int, "controls", controls)
-        classical_controls = convert_type_input_to_sequence(
-            int, "classical_controls", classical_controls
-        )
-
-        # Check for classical control
-        default_classical_ctrl_val = 2 ** (len(classical_controls)) - 1
-
-        if classical_control_value is None:
-            if len(classical_controls) > 0:
-                classical_control_value = default_classical_ctrl_val
-
-        elif not isinstance(classical_control_value, Int):
-            raise TypeError(
-                f"classical_control_value must be an integer or None, got {classical_control_value}"
-            )
-
-        elif (
-            classical_control_value < 0
-            or classical_control_value > default_classical_ctrl_val
-        ):
-            raise ValueError(
-                f"{classical_control_value} must be with [0, {default_classical_ctrl_val}]"
-            )
-
-        qubits = []
-        qubits.extend(controls)
-        qubits.extend(targets)
-
-        if len(classical_controls) > 0:
-            with self._builder.if_test(classical_controls, classical_control_value):
-                self.add(op=gate, qreg=tuple(qubits), style=style)
-        else:
-            self.add(op=gate, qreg=tuple(qubits), style=style)
-
     def add_circuit(self, qc, start=0):  # TODO Instead of start have a qubit mapping?
         """
         Adds a block of a qubit circuit to the main circuit.
@@ -548,65 +230,6 @@ class QuantumCircuit:
                 creg=circuit_op.creg,
                 style=circuit_op.style,
             )
-
-    def adjacent_gates(*args, **kwargs):
-        raise AttributeError(
-            "adjacent_gates method has been removed. "
-            "Use qutip_qip.transpiler.to_chain_structure method instead"
-        )
-
-    def remove_gate_or_measurement(
-        self, index=None, end=None, name=None, remove="first"
-    ):
-        """
-        Remove a gate from a specific index or between two indexes or the
-        first, last or all instances of a particular gate.
-
-        Parameters
-        ----------
-        index : int
-            Location of gate or measurement to be removed.
-        name : string
-            Gate or Measurement name to be removed.
-        remove : string
-            If first or all gates/measurements are to be removed.
-        """
-        raise AttributeError("remove_gate_or_measurement method has been removed. ")
-
-    def reverse_circuit(self):
-        """
-        Reverse an entire circuit of unitary gates.
-
-        Returns
-        -------
-        qubit_circuit : :class:`.QubitCircuit`
-            Return :class:`.QubitCircuit` of resolved gates for the
-            qubit circuit in the reverse order.
-        """
-
-        warnings.warn(
-            "QubitCircuit.reverse_circuit has been deprecated and will be future in future versions",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        temp = QubitCircuit(
-            self.num_qubits,
-            reverse_states=self.reverse_states,
-            num_cbits=self.num_cbits,
-            input_states=self.input_states,
-            output_states=self.output_states,
-        )
-
-        for circ_op in reversed(self.ops):
-            temp.add(
-                op=circ_op.op,
-                qreg=circ_op.qreg,
-                creg=circ_op.creg,
-                style=circ_op.style,
-            )
-
-        return temp
 
     def run(
         self,
@@ -1040,10 +663,419 @@ class QuantumCircuit:
 
 
 class QubitCircuit(QuantumCircuit):
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        num_qubits=None,
+        input_states=None,
+        output_states=None,
+        reverse_states=True,
+        dims=None,
+        num_cbits=0,
+        user_gates=None,
+        N=None,
+    ):
         warnings.warn(
             "QubitCircuit has been renamed to QuantumCircuit",
             DeprecationWarning,
             stacklevel=2,
         )
-        super().__init__(*args, **kwargs)
+
+        # number of qubits in the register
+        if N is not None:
+            warnings.warn(
+                "The 'N' parameter is deprecated. Please use 'num_qubits' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            num_qubits = N
+
+        self.dims = dims if dims is not None else [2] * num_qubits
+        self._builder = BloqBuilder(num_qubits, num_cbits, qreg_dim=self.dims)
+
+        self.reverse_states = reverse_states
+        self._instructions: list[CircuitInstruction] = []
+        self._built_count = -1
+
+        if input_states:
+            self.input_states = input_states
+        else:
+            self.input_states = [None for i in range(self.num_qreg + num_cbits)]
+
+        if output_states:
+            self.output_states = output_states
+        else:
+            self.output_states = [None for i in range(self.num_qreg + num_cbits)]
+
+        if user_gates is not None:
+            self.user_gates = user_gates
+
+        super().__init__(
+            num_qubits,
+            num_cbits,
+            dims,
+            input_states,
+            output_states,
+            reverse_states,
+        )
+
+    @property
+    def num_qubits(self) -> int:
+        """
+        Number of qubits in the circuit.
+        """
+        return self._builder.num_qreg
+
+    @property
+    def num_cbits(self) -> int:
+        """
+        Number of cbits in the circuit.
+        """
+        return self._builder.num_creg
+
+    @property
+    def N(self) -> int:
+        """
+        Number of qubits in the circuit.
+        """
+        warnings.warn(
+            "The 'N' parameter is deprecated. Please use 'num_qubits' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.num_qubits
+
+    @property
+    def gates(self) -> list[CircuitInstruction]:
+        warnings.warn(
+            "QubitCircuit.gates has been replaced with QubitCircuit.instructions",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.instructions
+
+    @gates.setter
+    def gates(self, value: any) -> None:
+        raise AttributeError(
+            "QubitCircuit.gates has been replaced with QubitCircuit.instructions",
+        )
+
+    @property
+    def user_gates(self) -> dict[str, type[Unitary]]:
+        return getattr(self, "_user_gates", {})
+
+    @user_gates.setter
+    def user_gates(self, value) -> None:
+        warnings.warn(
+            "Using circuit.user_gates with string gate names "
+            "is deprecated. Please define custom gates as "
+            "Gate classes instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self.__dict__["user_gates"] = value
+
+        gate_classes = {}
+        for gate_name, user_gate_callable in value.items():
+            parameters = tuple(
+                inspect.signature(user_gate_callable).parameters.values()
+            )
+            num_params = len(parameters)
+
+            if num_params == 0:
+                # Non parametric gate
+                unitary = user_gate_callable()
+                gate_classes[gate_name] = get_unitary_gate(gate_name, unitary)
+                continue
+
+            # Parametric gate.
+            # We don't know the dimension of the unitary, need a try-run.
+            sample_arg_value = tuple(
+                (
+                    parameter.default
+                    if parameter.default is not inspect.Parameter.empty
+                    else 0
+                )
+                for parameter in parameters
+            )
+            sample_unitary = user_gate_callable(*sample_arg_value)
+            _num_qreg = int(np.log2(sample_unitary.shape[0]))
+            _num_params = num_params
+
+            # Without it, if you write get_qobj directly in the loop and reference
+            # user_gate_callable, all generated classes can end up using the last callable
+            # from the loop (late binding).
+            def _make_get_qobj(_user_gate_callable):
+                def get_qobj(self, dtype="dense"):
+                    return _user_gate_callable(*self.arg_value).to(dtype)
+
+                return get_qobj
+
+            class _OldUserParametricGate(AngleUnitary):
+                name = gate_name
+                num_qreg = _num_qreg
+                __annotations__ = {f"arg{i}": float for i in range(_num_params)}
+
+                compute_qobj = _make_get_qobj(user_gate_callable)
+
+            gate_classes[gate_name] = _OldUserParametricGate
+
+        self._user_gates = gate_classes
+
+    def add_measurement(
+        self,
+        measurement: Type[Measurement],
+        targets: int | IntSequence,
+        classical_store: int | IntSequence,
+        index: None = None,
+    ):
+        """
+        Adds a measurement with specified parameters to the circuit.
+
+        Parameters
+        ----------
+        measurement : :class:`.Measurement`
+            `Measurement` subclasses
+        targets : int or Sequence of int
+            Gate targets
+        classical_store : int or Sequence of int
+            Classical register where result of measurement is stored.
+        index : list
+            Positions to add the gate.
+        """
+        if index is not None:
+            warnings.warn(
+                "The 'index' argument to 'add_measurement' is no longer supported and will "
+                "be ignored. Passing 'index' will be removed in a future version.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
+        if isinstance(measurement, str):
+            warnings.warn(
+                "Passing a string name to add_measurement has been removed. "
+                "Defaulting to measurement in the Z- basis.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            measurement = Mz
+
+        if targets is None or classical_store is None:
+            raise ValueError("'targets' and 'classical_store' must not be None")
+
+        targets = convert_type_input_to_sequence(int, "targets", targets)
+        classical_store = convert_type_input_to_sequence(
+            int, "classical_store", classical_store
+        )
+
+        self.add(
+            op=measurement,
+            qreg=tuple(targets),
+            creg=tuple(classical_store),
+        )
+
+    def add_gate(
+        self,
+        gate: Unitary | str,
+        targets: int | IntSequence = (),
+        controls: int | IntSequence = (),
+        classical_controls: int | IntSequence = (),
+        classical_control_value: int | None = None,
+        style: dict = None,
+        arg_value: None = None,
+        arg_label: None = None,
+        control_value: None = None,
+        index: None = None,
+    ):
+        """
+        Adds a gate with specified parameters to the circuit.
+
+        Parameters
+        ----------
+        gate: :class:`~.operations.Gate` or :obj:`~.operations.Gate` or str
+            Gate name. If gate is an instance of :class:`~.operations.Gate`,
+            parameters are unpacked and added.
+        targets: int or list, optional
+            Index for the target qubits.
+        controls: int or list, optional
+            Indices for the (quantum) control qubits.
+        arg_value: Any, optional
+            Arguments for the gate. It will be used when generating the
+            unitary matrix. For predefined gates, they are used when
+            calling the ``get_compact_qobj`` methods of a gate.
+        arg_label: string, optional
+            Label for gate representation.
+        classical_controls : int or list of int, optional
+            Indices of classical bits to control the gate.
+        control_value : optional
+            Value of classical bits to control on, the classical controls are
+            interpreted as an integer with the lowest bit being the first one.
+            If not specified, then the value is interpreted to be
+            2 ** len(classical_controls) - 1
+            (i.e. all classical controls are 1).
+        style:
+            For circuit draw
+        """
+        # Deprecation warnings
+        if index is not None:
+            warnings.warn(
+                "The 'index' argument to 'add_measurement' is no longer supported and will "
+                "be ignored. Gates are appended to the end of the circuit. "
+                "Passing 'index' will be removed in a future version.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
+        if arg_value is not None or arg_label is not None:
+            warnings.warn(
+                "Define 'arg_value', 'arg_label' in your Gate object e.g. RX(np.pi)"
+                ", 'arg_value', 'arg_label' arguments will be removed from 'add_gate' method in the future version.\n"
+                "Please refer to the tutorial for the recommended way to define them:\n"
+                "https://nbviewer.org/urls/qutip.org/qutip-tutorials/tutorials-v5/quantum-circuits/quantum-gates.ipynb",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
+        if control_value is not None:
+            warnings.warn(
+                "'control_value' is no longer a valid argument and has been deprecated and will be removed in the future version.\n"
+                "from qutip_qip.operations import controlled\n"
+                "from qutip_qip.operations.gates import X\n"
+                "Example: gate = controlled(X, num_ctrl_qreg=1, ctrl_value=0)\n"
+                "Please refer to the tutorial for the recommended way to define them:\n"
+                "https://nbviewer.org/urls/qutip.org/qutip-tutorials/tutorials-v5/quantum-circuits/quantum-gates.ipynb",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
+        if isinstance(gate, std.GLOBALPHASE):
+            self.add_global_phase(gate.arg_value[0])
+            return
+
+        # This conditional block can be remove if the gate input is only
+        # restricted to Gate subclasses or object instead of strings in the future.
+        if not isinstance(gate, Unitary):
+            if type(gate) is str:
+                if gate in std.GATE_CLASS_MAP:
+                    warnings.warn(
+                        "Passing Gate as a string input has been deprecated and will be removed in future versions.",
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
+                    gate_class = std.GATE_CLASS_MAP[gate]
+
+                elif gate in self.user_gates:
+                    gate_class = self.user_gates[gate]
+                else:
+                    raise ValueError(
+                        f"Gate '{gate}' is not a recognized standard gate or user-defined gate."
+                    )
+
+            else:
+                raise TypeError(
+                    "gate must be of a Gate object or a string ",
+                    f"got {gate} instead.",
+                )
+
+            if gate_class.is_parametric:
+                if isinstance(arg_value, (tuple, list, np.ndarray)):
+                    gate = gate_class(*arg_value)
+                else:
+                    gate = gate_class(arg_value)
+            else:
+                gate = gate_class
+
+        # Handling case for integer input
+        targets = convert_type_input_to_sequence(int, "targets", targets)
+        controls = convert_type_input_to_sequence(int, "controls", controls)
+        classical_controls = convert_type_input_to_sequence(
+            int, "classical_controls", classical_controls
+        )
+
+        # Check for classical control
+        default_classical_ctrl_val = 2 ** (len(classical_controls)) - 1
+
+        if classical_control_value is None:
+            if len(classical_controls) > 0:
+                classical_control_value = default_classical_ctrl_val
+
+        elif not isinstance(classical_control_value, Int):
+            raise TypeError(
+                f"classical_control_value must be an integer or None, got {classical_control_value}"
+            )
+
+        elif (
+            classical_control_value < 0
+            or classical_control_value > default_classical_ctrl_val
+        ):
+            raise ValueError(
+                f"{classical_control_value} must be with [0, {default_classical_ctrl_val}]"
+            )
+
+        qubits = []
+        qubits.extend(controls)
+        qubits.extend(targets)
+
+        if len(classical_controls) > 0:
+            with self._builder.if_test(classical_controls, classical_control_value):
+                self.add(op=gate, qreg=tuple(qubits), style=style)
+        else:
+            self.add(op=gate, qreg=tuple(qubits), style=style)
+
+    def remove_gate_or_measurement(
+        self, index=None, end=None, name=None, remove="first"
+    ):
+        """
+        Remove a gate from a specific index or between two indexes or the
+        first, last or all instances of a particular gate.
+
+        Parameters
+        ----------
+        index : int
+            Location of gate or measurement to be removed.
+        name : string
+            Gate or Measurement name to be removed.
+        remove : string
+            If first or all gates/measurements are to be removed.
+        """
+        raise AttributeError("remove_gate_or_measurement method has been removed. ")
+
+    def reverse_circuit(self):
+        """
+        Reverse an entire circuit of unitary gates.
+
+        Returns
+        -------
+        qubit_circuit : :class:`.QubitCircuit`
+            Return :class:`.QubitCircuit` of resolved gates for the
+            qubit circuit in the reverse order.
+        """
+
+        warnings.warn(
+            "QubitCircuit.reverse_circuit has been deprecated and will be future in future versions",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        temp = QubitCircuit(
+            self.num_qubits,
+            reverse_states=self.reverse_states,
+            num_cbits=self.num_cbits,
+            input_states=self.input_states,
+            output_states=self.output_states,
+        )
+
+        for circ_op in reversed(self.ops):
+            temp.add(
+                op=circ_op.op,
+                qreg=circ_op.qreg,
+                creg=circ_op.creg,
+                style=circ_op.style,
+            )
+
+        return temp
+
+    def adjacent_gates(*args, **kwargs):
+        raise AttributeError(
+            "adjacent_gates method has been removed. "
+            "Use qutip_qip.transpiler.to_chain_structure method instead"
+        )
